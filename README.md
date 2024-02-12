@@ -4,6 +4,7 @@
 Repositório para o projeto do microcomputador retrô usando a cpu 6502.
 
 Diretórios do projeto
+
 Docs		> Documentos
 Firmwares	> Firmwares testes
 GAL20V8B	> Arquivo para gerar a PLD
