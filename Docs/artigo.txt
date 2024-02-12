@@ -1,0 +1,12 @@
+Projeto com 6502 cpu do lendário apple ][
+
+Esse é um projeto que tenho em mente há muito tempo, desde que conheci o apple ][ que ele me fascina porém no meu circulo de amizades em eletrônica
+ninguém tinha um portanto ficou esquecido até que recentemente comecei a pesquisar sobre o 6502 e a vontade de programar para ele renasceu.
+
+Eu vi muitas montagens com o 6502 principalmente a do Ben Eater que para mim é muito curiosa pois ele montou todo o computador em uma protoboard,
+o Ben tem muitos vídeos sobre a montagem do computador com o 6502, depois de ver todas essas montagens eu decidi fazer um pouco diferente até mesmo
+porque essa montagem que eu escolhi foi a montagem escolhida por mim na década de 1980 para montar um computador com a cpu 8080 e quis relembrar 
+aqueles tempos em que os componentes eram caros e difíceis de encontrar e as informações somente nas resvistas e livros.
+
+
+
