@@ -1,0 +1,88 @@
+Name      SPARTAN;
+PartNo    2024012901;
+Date      2024/01/29;
+Revision  03;
+Designer  PDSilva        ;
+Company   Open Software Ltda;
+Assembly  None;
+Location  None;
+Device    G20V8A;
+/*Device    G20V8MA;*/
+/*Device    G20V8AS; */
+
+/*
+TOTAL 
+SRAM = 49151 bytes
+ROM  = 12288 bytes
+IO   =  4096 bytes
+	
+*/
+
+/*INPUTS*/
+pin 1  = A15;
+pin 2  = A14;
+pin 3  = A13;
+pin 4  = A12;
+pin 5  = A11;
+pin 6  = A10;
+pin 7  = A09;
+pin 8  = A08;
+pin 9  = RW;
+pin 10 = PHI2;
+pin 11 = BRESET;
+
+/*OUTPUTS*/
+pin 22 = ROMCE;
+pin 21 = RAMWE;
+pin 20 = IORQ;
+pin 19 = RAMCS;
+pin 18 = RAMOE;
+pin 17 = ROMOE;
+pin 16 = RESET;
+pin 15 = SLOT4;
+
+/*INTERMEDIATES*/
+L01  =  !A15 & !A14 & !A13 & !A12 & !A11;       /*0x0000  RAM 2048    */
+L02  =  !A15 & !A14 & !A13 & !A12 &  A11;       /*0x0800  RAM 2048    */
+L03  =  !A15 & !A14 & !A13 &  A12 & !A11;       /*0x1000  RAM 2048    */
+L04  =  !A15 & !A14 & !A13 &  A12 &  A11;       /*0x1800  RAM 2048    */
+L05  =  !A15 & !A14 &  A13 & !A12 & !A11;       /*0x2000  RAM 2048    */
+L06  =  !A15 & !A14 &  A13 & !A12 &  A11;       /*0x2800  RAM 2048    */
+L07  =  !A15 & !A14 &  A13 &  A12 & !A11;       /*0x3000  RAM 2048    */
+L08  =  !A15 & !A14 &  A13 &  A12 &  A11;       /*0x3800  RAM 2048    */
+L09  =  !A15 &  A14 & !A13 & !A12 & !A11;       /*0x4000  RAM 2048    */
+L10  =  !A15 &  A14 & !A13 & !A12 &  A11;       /*0x4800  RAM 2048    */
+L11  =  !A15 &  A14 & !A13 &  A12 & !A11;       /*0x5000  RAM 2048    */
+L12  =  !A15 &  A14 & !A13 &  A12 &  A11;       /*0x5800  RAM 2048    */
+L13  =  !A15 &  A14 &  A13 & !A12 & !A11;       /*0x6000  RAM 2048    */
+L14  =  !A15 &  A14 &  A13 & !A12 &  A11;       /*0x6800  RAM 2048    */
+L15  =  !A15 &  A14 &  A13 &  A12 & !A11;       /*0x7000  RAM 2048    */
+L16  =  !A15 &  A14 &  A13 &  A12 &  A11;       /*0x7800  RAM 2048    */
+L17  =   A15 & !A14 & !A13 & !A12 & !A11;       /*0x8000  RAM 2048    */
+L18  =   A15 & !A14 & !A13 & !A12 &  A11;       /*0x8800  RAM 2048    */
+L19  =   A15 & !A14 & !A13 &  A12 & !A11;       /*0x9000  RAM 2048    */
+L20  =   A15 & !A14 & !A13 &  A12 &  A11;       /*0x9800  RAM 2048    */
+L21  =   A15 & !A14 &  A13 & !A12 & !A11;       /*0xA000  RAM 2048    */
+L22  =   A15 & !A14 &  A13 & !A12 &  A11;       /*0xA800  RAM 2048    */
+L23  =   A15 & !A14 &  A13 &  A12 & !A11;       /*0xB000  RAM 2048    */
+L24  =   A15 & !A14 &  A13 &  A12 &  A11;       /*0xB800  RAM 2048    */
+L25  =   A15 &  A14 & !A13 & !A12 & !A11;       /*0xC000  RAM 2048    */
+L26  =   A15 &  A14 & !A13 & !A12 &  A11;       /*0xC800  RAM 2048    */
+L27  =   A15 &  A14 & !A13 &  A12 & !A11;       /*0xD000  RAM 2048    */
+L28  =   A15 &  A14 & !A13 &  A12 &  A11;       /*0xD800  RAM 2048    */
+L29  =   A15 &  A14 &  A13 & !A12 & !A11;       /*0xE000  IO  2048    */
+L30  =   A15 &  A14 &  A13 & !A12 &  A11;       /*0xE800  IO  2048    */
+L31  =   A15 &  A14 &  A13 &  A12 & !A11;       /*0xF000  ROM 2048    */
+L32  =   A15 &  A14 &  A13 &  A12 &  A11;       /*0xF800  ROM 2048    */
+
+
+!RAMCS = !A15 # !A14;   /* 0X0000 <-> 0xBFFF 49151 Bytes*/
+!ROMCE = L27 # L28 # L29 # L30 # L31 # L32;	 /* 0xD000 <-> 0xFFFF 12288 bytes*/
+!IORQ  = L25 # L26;		/* 0xC000 <-> 0xCFFF 4096 Bytes */			
+					
+!RAMWE = !RW & PHI2;		
+!RAMOE = PHI2 & RW;
+!ROMOE = PHI2 & RW;
+
+RESET  = !BRESET;	
+
