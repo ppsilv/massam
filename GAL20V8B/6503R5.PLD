@@ -6,7 +6,7 @@ Designer  PDSilva        ;
 Company   Open Software Ltda;
 Assembly  None;
 Location  None;
-Device    G20V8A;
+Device    g20v8a;
 /*Device    G20V8MA;*/
 /*Device    G20V8AS; */
 
@@ -84,5 +84,5 @@ L32  =   A15 &  A14 &  A13 &  A12 &  A11;       /*0xF800  ROM 2048    */
 !RAMOE = PHI2 & RW;
 !ROMOE = PHI2 & RW;
 
-RESET  = !BRESET;	
+!RESET  = BRESET;	
 

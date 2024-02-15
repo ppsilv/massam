@@ -7,15 +7,16 @@ PIN   4 =  A12
 PIN   3 =  A13 
 PIN   2 =  A14 
 PIN   1 =  A15 
+PIN  11 =  BRESET 
 PIN  20 =  IORQ 
 PIN  10 =  PHI2 
 PIN  19 =  RAMCS 
 PIN  18 =  RAMOE 
 PIN  21 =  RAMWE 
+PIN  16 =  RESET 
 PIN  22 =  ROMCE 
 PIN  17 =  ROMOE 
 PIN   9 =  RW 
-PIN  16 =  SLOT3 
 PIN  15 =  SLOT4 
 %END
 
@@ -132,6 +133,9 @@ L32 =>
 
 !RAMWE =>
     PHI2 & !RW
+
+!RESET =>
+    BRESET
 
 !ROMCE =>
     !A11 & A12 & !A13 & A14 & A15
