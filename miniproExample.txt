@@ -1,0 +1,2 @@
+minipro -p SST39SF512 -w source.bin
+

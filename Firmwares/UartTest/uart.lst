@@ -1,0 +1,309 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : uart.s
+Current file: uart.s
+
+000000r 1               
+000000r 1               ;Block 0
+000000r 1               ;------------------------------------
+000000r 1               ;Zero page general-purpose addresses
+000000r 1               ;("extra registers" to augment A, X, Y)
+000000r 1               
+000000r 1               B = $00
+000000r 1               C = $01
+000000r 1               D = $02
+000000r 1               E = $03
+000000r 1               F = $04
+000000r 1               G = $05
+000000r 1               H = $06
+000000r 1               I = $07
+000000r 1               J = $08
+000000r 1               K = $09
+000000r 1               L = $0a
+000000r 1               M = $0b
+000000r 1               N = $0c
+000000r 1               O = $0d
+000000r 1               P = $0e
+000000r 1               Q = $0f
+000000r 1               
+000000r 1               ;UART Addresses
+000000r 1               ;Note:
+000000r 1               ;Uart 16C550
+000000r 1               
+000000r 1               RBR  = $7a20    ;;receiver buffer register (read only)
+000000r 1               THR  = $7a20    ;;transmitter holding register (write only)
+000000r 1               IER  = $7a21    ;;interrupt enable register
+000000r 1               IIR  = $7a22    ;;interrupt identification register
+000000r 1               FCR  = $7a22    ;;FIFO control register
+000000r 1               LCR  = $7a23    ;;line control register
+000000r 1               MCR  = $7a24    ;;modem control register
+000000r 1               ULSR = $7a25    ;;line status register
+000000r 1               MSR  = $7a26    ;;modem status register
+000000r 1               DLL  = $7a20    ;;divisor latch LSB (if DLAB=1)
+000000r 1               DLM  = $7a21    ;;divisor latch MSB (if DLAB=1)
+000000r 1               
+000000r 1               
+000000r 1               ;FCR (FIFO Control) constants
+000000r 1               NO_FIFO = %00000000
+000000r 1               FIFO_ENABLE = %00000111
+000000r 1               
+000000r 1               ;LCR (Line Control) constants
+000000r 1               LCR_8N1 = %00000011
+000000r 1               DLAB = %10000000
+000000r 1               
+000000r 1               ;LSR (Line Status) constants
+000000r 1               DATA_READY = %00000001
+000000r 1               OVERRUN_ERR = %00000010
+000000r 1               PARITY_ERR = %00000100
+000000r 1               FRAMING_ERR = %00001000
+000000r 1               BREAK_INT = %00010000
+000000r 1               THR_EMPTY = %00100000
+000000r 1               TX_EMPTY = %01000000
+000000r 1               RX_FIFO_ERR = %10000000
+000000r 1               
+000000r 1               ;IER (Interrupt Enable) constants
+000000r 1               POLLED_MODE = %00000000
+000000r 1               DATA_INT = %00000001
+000000r 1               THR_EMPTY_INT = %00000010
+000000r 1               ERROR_INT = %00000100
+000000r 1               MODEM_STATUS_INT = %00001000
+000000r 1               
+000000r 1               ;IIR (Interrupt Identification) constants
+000000r 1               IIR_DATA_AVAILABLE = %00000100
+000000r 1               IIR_ERROR = %00000110
+000000r 1               IIR_CHR_TIMEOUT = %00001100
+000000r 1               IIR_THR_EMPTY = %00000010
+000000r 1               IIR_MODEM_STATUS = %00000000
+000000r 1               
+000000r 1               ;DLL/DLM (Divisor Latch) constants
+000000r 1               DIV_4800_LO = 13
+000000r 1               DIV_4800_HI = 0
+000000r 1               
+000000r 1               DIV_9600_LO = 12
+000000r 1               DIV_9600_HI = 0
+000000r 1               
+000000r 1               DIV_38400_LO = 3
+000000r 1               DIV_38400_HI = 0
+000000r 1               
+000000r 1               
+000000r 1               ;zp.uart_flag bits
+000000r 1               ERROR_FLAG = %10000000
+000000r 1               OVERRUN_FLAG = %10000000
+000000r 1               PARITY_ERR_FLAG = %10000000
+000000r 1               FRAMING_ERR_FLAG = %10000000
+000000r 1               BREAK_INT_FLAG = %10000000
+000000r 1               
+000000r 1               
+000000r 1               ;Other constants
+000000r 1               UART_BUFFER_SIZE = 16
+000000r 1               
+000000r 1               
+000000r 1               
+000000r 1               ;---------------------------------------------------------------------------------------
+000000r 1               ;Initialize the UART
+000000r 1               ;Uses 8n1 mode with no FIFO and 4800 baud @ 1MHz clock
+000000r 1               ;
+000000r 1               init:
+000000r 1  48           	pha
+000001r 1               
+000001r 1  A9 80        	lda #DLAB
+000003r 1  8D 23 7A         sta LCR                     ;set the divisor latch access bit (DLAB)
+000006r 1               
+000006r 1  A9 0D            lda #DIV_4800_LO
+000008r 1  8D 20 7A         sta DLL                     ;store divisor low byte (4800 baud @ 1 MHz clock)
+00000Br 1               
+00000Br 1  A9 00            lda #DIV_4800_HI
+00000Dr 1  8D 21 7A         sta DLM                     ;store divisor hi byte
+000010r 1               
+000010r 1  A9 07            lda #FIFO_ENABLE
+000012r 1  8D 22 7A         sta FCR                     ;enable the UART FIFO
+000015r 1               
+000015r 1  A9 00            lda #POLLED_MODE
+000017r 1  8D 21 7A         sta IER                     ;disable all interrupts
+00001Ar 1               
+00001Ar 1  A9 03            lda #LCR_8N1				;set 8 data bits, 1 stop bit, no parity, disable DLAB
+00001Cr 1  8D 23 7A         sta LCR
+00001Fr 1               
+00001Fr 1  68               pla
+000020r 1  60               rts
+000021r 1               
+000021r 1               
+000021r 1               ;---------------------------------------------------------------------------------------
+000021r 1               ;Initialize the UART
+000021r 1               ;Uses 8n1 mode with no FIFO and 38400 baud @ 1.8...MHz clock
+000021r 1               ;
+000021r 1               init_38400:
+000021r 1  48               pha
+000022r 1               
+000022r 1  A9 80            lda #DLAB
+000024r 1  8D 23 7A         sta LCR                                                 ;set the divisor latch access bit (DLAB)
+000027r 1               
+000027r 1  A9 03            lda #DIV_38400_LO
+000029r 1  8D 20 7A         sta DLL                                                 ;store divisor low byte (4800 baud @ 1 MHz clock)
+00002Cr 1               
+00002Cr 1  A9 00            lda #DIV_38400_HI
+00002Er 1  8D 21 7A         sta DLM                                                 ;store divisor hi byte
+000031r 1               
+000031r 1  A9 07            lda #FIFO_ENABLE
+000033r 1  8D 22 7A         sta FCR                                                 ;enable the UART FIFO
+000036r 1               
+000036r 1  A9 00            lda #POLLED_MODE
+000038r 1  8D 21 7A         sta IER                                                 ;disable all interrupts
+00003Br 1               
+00003Br 1  A9 03            lda #LCR_8N1
+00003Dr 1  8D 23 7A         sta LCR                                                 ;set 8 data bits, 1 stop bit, no parity, disable DLAB                                             ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+000040r 1               
+000040r 1               
+000040r 1  68               pla
+000041r 1  60               rts
+000042r 1               
+000042r 1               ;---------------------------------------------------------------------------------------
+000042r 1               ;Initialize the UART
+000042r 1               ;Uses 8n1 mode with no FIFO and 4800 baud @ 1MHz clock
+000042r 1               ;
+000042r 1               init_9600:
+000042r 1  48           	pha
+000043r 1               
+000043r 1  A9 80        	lda #DLAB
+000045r 1  8D 23 7A         sta LCR                                            		;set the divisor latch access bit (DLAB)
+000048r 1               
+000048r 1  A9 0C            lda #DIV_9600_LO
+00004Ar 1  8D 20 7A         sta DLL                                            		;store divisor low byte (4800 baud @ 1 MHz clock)
+00004Dr 1               
+00004Dr 1  A9 00            lda #DIV_9600_HI
+00004Fr 1  8D 21 7A         sta DLM                                            		;store divisor hi byte
+000052r 1                                                     		;set 8 data bits, 1 stop bit, no parity, disable DLAB
+000052r 1               
+000052r 1  A9 07            lda #FIFO_ENABLE
+000054r 1  8D 22 7A         sta FCR                                            		;enable the UART FIFO
+000057r 1               
+000057r 1  A9 00            lda #POLLED_MODE
+000059r 1  8D 21 7A         sta IER                                            		;disable all interrupts
+00005Cr 1               
+00005Cr 1               
+00005Cr 1  A9 03            lda #LCR_8N1
+00005Er 1  8D 23 7A         sta LCR
+000061r 1               
+000061r 1  68               pla
+000062r 1  60               rts
+000063r 1               
+000063r 1               
+000063r 1               ;---------------------------------------------------------------------------------------
+000063r 1               ;Read a byte from the UART into A. Blocks until a byte is available.
+000063r 1               ;If there was an error, set the C flag.
+000063r 1               ;C flag clear means a byte was successfully read into A.
+000063r 1               ;
+000063r 1               read_byte:
+000063r 1               
+000063r 1  AD 25 7A     	lda ULSR 												;check the line status register
+000066r 1  29 1E        	and #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT) ;check for errors
+000068r 1  F0 05        	beq no_err 												;if no error bits, are set, no error
+00006Ar 1  AD 20 7A     	lda RBR 												;otherwise, there was an error. Clear the error byte
+00006Dr 1  38           	sec 													;set the carry flag to indicate error
+00006Er 1  60           	rts
+00006Fr 1               
+00006Fr 1               no_err:
+00006Fr 1  AD 25 7A     	lda ULSR 												;reload the line status register
+000072r 1               
+000072r 1  29 01        	and #DATA_READY
+000074r 1  F0 ED        	beq read_byte 											;if data ready is not set, loop
+000076r 1               
+000076r 1  AD 20 7A     	lda RBR 												;otherwise, we have data! Load it.
+000079r 1  18           	clc 													;clear the carry flag to indicate no error
+00007Ar 1               
+00007Ar 1  60           	rts 													;return
+00007Br 1               
+00007Br 1               
+00007Br 1               
+00007Br 1               
+00007Br 1               ;---------------------------------------------------------------------------------------
+00007Br 1               ;Write a byte in A to the UART.
+00007Br 1               ;Blocks until the UART is ready to send (transmitter holding register is empty)
+00007Br 1               ;
+00007Br 1               write_byte:
+00007Br 1  48           	pha
+00007Cr 1               wait_for_thr_empty:
+00007Cr 1  AD 25 7A     	lda ULSR
+00007Fr 1  29 20        	and #THR_EMPTY
+000081r 1  F0 F9        	beq wait_for_thr_empty 									;loop while the THR is not empty
+000083r 1               
+000083r 1  68           	pla
+000084r 1  8D 20 7A     	sta THR 												;send the byte
+000087r 1  60           	rts
+000088r 1               
+000088r 1               
+000088r 1               ;---------------------------------------------------------------------------------------
+000088r 1               ;Read two bytes into target and target+1. Blocking. Clobbers A
+000088r 1               ;Sets carry bit if either byte has an error.
+000088r 1               ;If no error, clear carry bit
+000088r 1               ;
+000088r 1               ;.macro uart_read_2 target
+000088r 1               ;	jsr read_byte
+000088r 1               ;	sta target
+000088r 1               ;	bcs byte1_err
+000088r 1               ;
+000088r 1               ;	jsr read_byte
+000088r 1               ;	sta target+1
+000088r 1               ;	jmp done
+000088r 1               ;
+000088r 1               ;byte1_err:
+000088r 1               ;	jsr read_byte
+000088r 1               ;	sta target+1
+000088r 1               ;	sec 													;set carry bit to indicate error in byte 1
+000088r 1               ;
+000088r 1               ;done:
+000088r 1               ;.endmacro
+000088r 1               
+000088r 1               
+000088r 1               ;---------------------------------------------------------------------------------------
+000088r 1               ;Read (n_addr) bytes into (target_addr), ..., (target_addr)+(n_addr)-1.
+000088r 1               ;Blocking. Clobbers A, zp.B,C,D
+000088r 1               ;Address n_addr, n_addr+1 should contain the number of bytes to read
+000088r 1               ;Address target_addr, target_addr+1 should contain the target address
+000088r 1               ;The Fletcher checksum of the received bytes will be stored in checksum_addr,checksum_addr+1
+000088r 1               ;
+000088r 1               ;.macro uart_read_n_with_checksum n_addr, target_addr, checksum_addr
+000088r 1               ;	phx
+000088r 1               ;	phy
+000088r 1               ;
+000088r 1               ;	stz checksum_addr
+000088r 1               ;	stz checksum_addr+1 									;initialize checksum
+000088r 1               ;
+000088r 1               ;	ldx #0 													;store num bytes copied low byte in X
+000088r 1               ;	stz B 												;store num pages copied in X
+000088r 1               ;
+000088r 1               ;	ldy #0 													;store 0 in y for indirect addressing
+000088r 1               ;
+000088r 1               ;	mov2 target_addr : C 								;store the target address in zp.C,D
+000088r 1               ;
+000088r 1               ;loop:
+000088r 1               ;	jsr read_byte 										;get a byte
+000088r 1               ;	sta C,y 											;store the byte in the pointer in zp.C,D
+000088r 1               ;
+000088r 1               ;	clc
+000088r 1               ;	adc checksum_addr
+000088r 1               ;	sta checksum_addr 										;update the first checksum byte
+000088r 1               ;	clc
+000088r 1               ;	adc checksum_addr+1
+000088r 1               ;	sta checksum_addr+1 									;update the second checksum byte
+000088r 1               ;
+000088r 1               ;	inc C 												;increment the pointer
+000088r 1               ;	bne no_carry 											;if it doesn't become 0, no need to carry
+000088r 1               ;	inc C+1 												;if it does become 0, carry to high byte
+000088r 1               ;no_carry:
+000088r 1               ;	inx 													;increment num bytes copied
+000088r 1               ;	bne no_x_carry
+000088r 1               ;	inc B 												;if carrying, increment num pages copied
+000088r 1               ;no_x_carry:
+000088r 1               ;	cpx n_addr
+000088r 1               ;	bne loop												;if x doesn't match file size low bytes, still copying
+000088r 1               ;	lda B
+000088r 1               ;	cmp n_addr+1
+000088r 1               ;	bcc loop												;if num pages copied less than filesize high byte, still copying
+000088r 1               ;
+000088r 1               ;	ply
+000088r 1               ;	plx
+000088r 1               ;
+000088r 1               ;.endmacro
+000088r 1               
+000088r 1               
+000088r 1               
