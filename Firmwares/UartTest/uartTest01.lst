@@ -203,54 +203,56 @@ Current file: uartTest01.s
 0000D4r 1               
 0000D4r 1               ;-----------------------------------------------------------------------------------------
 0000D4r 1               ; Delay
+0000D4r 1               ;cpu clock..: 1.843.200 hz
+0000D4r 1               ;period.....: 0,542 ns
+0000D4r 1               ;deley total: 1,0 ms
 0000D4r 1               delay:
-0000D4r 1  A0 FF            ldy  #$ff   ; (2 cycles)
-0000D6r 1  A2 FF            ldx  #$ff   ; (2 cycles)
-0000D8r 1  CA           delay1: dex         ; (2 cycles)
-0000D9r 1  D0 FD            bne  delay1 ; (3 cycles in loop, 2 cycles at end)
-0000DBr 1  88               dey         ; (2 cycles)
-0000DCr 1  D0 FA            bne  delay1 ; (3 cycles in loop, 2 cycles at end)
-0000DEr 1  60           	rts
-0000DFr 1               
-0000DFr 1               ;/* ---------------------------------------------------------------------------------------
-0000DFr 1               ;Write a byte in A to the UART.
-0000DFr 1               ;Blocks until the UART is ready to send (transmitter holding register is empty)
-0000DFr 1               ;*/
-0000DFr 1               PrintChar:
-0000DFr 1               write_byte:
-0000DFr 1  48           	pha
-0000E0r 1               wait_for_thr_empty:
-0000E0r 1  AD 05 C0     	lda ULSR
-0000E3r 1  29 20        	and #THR_EMPTY
-0000E5r 1  F0 F9        	beq wait_for_thr_empty 									; loop while the THR is not empty
-0000E7r 1  68           	pla
-0000E8r 1  8D 00 C0     	sta THR 												; send the byte
-0000EBr 1  60           	rts
-0000ECr 1               
-0000ECr 1               ;---------------------------------------------------------------------------------------
-0000ECr 1               ;Initialize the UART
-0000ECr 1               ;Uses 8n1 mode with no FIFO and 4800 baud @ 1MHz clock
-0000ECr 1               ;
-0000ECr 1               init_9600:
-0000ECr 1  48               pha
-0000EDr 1  A9 80            lda #DLAB
-0000EFr 1  8D 03 C0         sta LCR                 ;set the divisor latch access bit (DLAB)
-0000F2r 1  A9 0C            lda #DIV_9600_LO
-0000F4r 1  8D 00 C0         sta DLL                 ;store divisor low byte (4800 baud @ 1 MHz clock)
-0000F7r 1  A9 00            lda #DIV_9600_HI
-0000F9r 1  8D 01 C0         sta DLM                 ;store divisor hi byte
-0000FCr 1                                           ;set 8 data bits, 1 stop bit, no parity, disable DLAB
-0000FCr 1  A9 07            lda #FIFO_ENABLE
-0000FEr 1  8D 02 C0         sta FCR                 ;enable the UART FIFO
-000101r 1  A9 00            lda #POLLED_MODE
-000103r 1  8D 01 C0         sta IER                 ;disable all interrupts
-000106r 1  A9 03            lda #LCR_8N1
-000108r 1  8D 03 C0         sta LCR
-00010Br 1  68               pla
-00010Cr 1  60               rts
-00010Dr 1               
-00010Dr 1               ;Cpu reset address
-00010Dr 1               .segment    "RESETVEC"
+0000D4r 1  A2 CD        	ldx  #$CD   ; (2 cycles)
+0000D6r 1               delay1:
+0000D6r 1  EA           	nop			; (2 cycles) 1us
+0000D7r 1  CA           	dex         ; (2 cycles) 1us
+0000D8r 1  D0 FC        	bne  delay1 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+0000DAr 1  60           	rts
+0000DBr 1               
+0000DBr 1               ;/* ---------------------------------------------------------------------------------------
+0000DBr 1               ;Write a byte in A to the UART.
+0000DBr 1               ;Blocks until the UART is ready to send (transmitter holding register is empty)
+0000DBr 1               ;*/
+0000DBr 1               PrintChar:
+0000DBr 1               write_byte:
+0000DBr 1  48           	pha
+0000DCr 1               wait_for_thr_empty:
+0000DCr 1  AD 05 C0     	lda ULSR
+0000DFr 1  29 20        	and #THR_EMPTY
+0000E1r 1  F0 F9        	beq wait_for_thr_empty 									; loop while the THR is not empty
+0000E3r 1  68           	pla
+0000E4r 1  8D 00 C0     	sta THR 												; send the byte
+0000E7r 1  60           	rts
+0000E8r 1               
+0000E8r 1               ;---------------------------------------------------------------------------------------
+0000E8r 1               ;Initialize the UART
+0000E8r 1               ;Uses 8n1 mode with no FIFO and 4800 baud @ 1MHz clock
+0000E8r 1               ;
+0000E8r 1               init_9600:
+0000E8r 1  48               pha
+0000E9r 1  A9 80            lda #DLAB
+0000EBr 1  8D 03 C0         sta LCR                 ;set the divisor latch access bit (DLAB)
+0000EEr 1  A9 0C            lda #DIV_9600_LO
+0000F0r 1  8D 00 C0         sta DLL                 ;store divisor low byte (4800 baud @ 1 MHz clock)
+0000F3r 1  A9 00            lda #DIV_9600_HI
+0000F5r 1  8D 01 C0         sta DLM                 ;store divisor hi byte
+0000F8r 1                                           ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+0000F8r 1  A9 07            lda #FIFO_ENABLE
+0000FAr 1  8D 02 C0         sta FCR                 ;enable the UART FIFO
+0000FDr 1  A9 00            lda #POLLED_MODE
+0000FFr 1  8D 01 C0         sta IER                 ;disable all interrupts
+000102r 1  A9 03            lda #LCR_8N1
+000104r 1  8D 03 C0         sta LCR
+000107r 1  68               pla
+000108r 1  60               rts
+000109r 1               
+000109r 1               ;Cpu reset address
+000109r 1               .segment    "RESETVEC"
 000000r 1               
 000000r 1  00 0F                    .word   $0F00
 000002r 1  rr rr                    .word   RESET
