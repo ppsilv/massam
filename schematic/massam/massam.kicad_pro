@@ -328,6 +328,14 @@
     [
       "fbb6aedb-7d93-4267-805b-c7b6e0443ae1",
       "Parallel Interface"
+    ],
+    [
+      "4d15044e-ba42-49c7-9385-a61cb67a80bd",
+      "W65C02"
+    ],
+    [
+      "81f8d90f-b399-4f33-998f-520e13bbf745",
+      "R6502"
     ]
   ],
   "text_variables": {}

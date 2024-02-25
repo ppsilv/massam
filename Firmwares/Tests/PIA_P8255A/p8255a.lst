@@ -1,0 +1,247 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : p8255a.s
+Current file: p8255a.s
+
+000000r 1               .setcpu "6502"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               .include "../../libs/pageZero.s"
+000000r 2               ;Page Zero
+000000r 2               Q 		= $75
+000000r 2               T1		= $76
+000000r 2               L        	= $77
+000000r 2               MSGL     	= $78
+000000r 2               MSGH     	= $79
+000000r 2               COUNTER  	= $7A
+000000r 2               CRC      	= $7B
+000000r 2               CRCCHECK 	= $7C
+000000r 2               STL      	= $7D
+000000r 2               STH      	= $7E
+000000r 2               
+000000r 1               
+000000r 1               RESET:
+000000r 1  78           	sei						; No interrupt
+000001r 1  D8           	cld						; Set decimal
+000002r 1  A2 FF        	ldx #$ff				; Set stack pointer
+000004r 1  9A           	txs						;
+000005r 1  20 rr rr     	jsr init_9600			; Configure uart to 9600 baudrate
+000008r 1  20 rr rr     	jsr init_8255
+00000Br 1  20 rr rr     	jsr	delay				;No need but why not?
+00000Er 1  20 rr rr     	jsr ClearScreen
+000011r 1               
+000011r 1               Loop:
+000011r 1                   ; Display Welcome message
+000011r 1  A9 18        	lda #24
+000013r 1  85 75        	sta Q
+000015r 1               @loop:
+000015r 1  A2 rr        	LDX #<WelcomeMessage
+000017r 1  A0 rr        	LDY #>WelcomeMessage
+000019r 1  20 rr rr     	jsr PrintString
+00001Cr 1  C6 75        	dec Q
+00001Er 1  D0 F5        	bne @loop
+000020r 1  A9 00        	lda #$00
+000022r 1  8D 00 C1     	sta PORTA
+000025r 1  A9 00        	lda #$00
+000027r 1  8D 01 C1     	sta PORTB
+00002Ar 1  A9 00        	lda #$00
+00002Cr 1  8D 02 C1     	sta PORTC
+00002Fr 1  20 rr rr     	jsr delay
+000032r 1  20 rr rr     	jsr ClearScreen
+000035r 1  A9 FF        	lda #$FF
+000037r 1  8D 00 C1     	sta PORTA
+00003Ar 1  A9 FF        	lda #$FF
+00003Cr 1  8D 01 C1     	sta PORTB
+00003Fr 1  A9 FF        	lda #$FF
+000041r 1  8D 02 C1     	sta PORTC
+000044r 1  4C rr rr     	jmp Loop		;;Infinit loop
+000047r 1               
+000047r 1               .include "../../libs/uartinit.s"
+000047r 2               
+000047r 2               ;Uart registers
+000047r 2               RBR  = $C000    ;;receiver buffer register (read only)
+000047r 2               THR  = $C000    ;;transmitter holding register (write only)
+000047r 2               IER  = $C001    ;;interrupt enable register
+000047r 2               IIR  = $C002    ;;interrupt identification register
+000047r 2               FCR  = $C002    ;;FIFO control register
+000047r 2               LCR  = $C003    ;;line control register
+000047r 2               MCR  = $C004    ;;modem control register
+000047r 2               ULSR = $C005    ;;line status register
+000047r 2               MSR  = $C006    ;;modem status register
+000047r 2               DLL  = $C000    ;;divisor latch LSB (if DLAB=1)
+000047r 2               DLM  = $C001    ;;divisor latch MSB (if DLAB=1)
+000047r 2               
+000047r 2               ;FCR (FIFO Control) constants
+000047r 2               NO_FIFO = %00000000
+000047r 2               FIFO_ENABLE = %00000111
+000047r 2               
+000047r 2               ;LCR (Line Control) constants
+000047r 2               LCR_8N1 = %00000011
+000047r 2               DLAB = %10000000
+000047r 2               
+000047r 2               ;LSR (Line Status) constants
+000047r 2               DATA_READY = %00000001
+000047r 2               OVERRUN_ERR = %00000010
+000047r 2               PARITY_ERR = %00000100
+000047r 2               FRAMING_ERR = %00001000
+000047r 2               BREAK_INT = %00010000
+000047r 2               THR_EMPTY = %00100000
+000047r 2               TX_EMPTY = %01000000
+000047r 2               RX_FIFO_ERR = %10000000
+000047r 2               
+000047r 2               ;IER (Interrupt Enable) constants
+000047r 2               POLLED_MODE = %00000000
+000047r 2               DATA_INT = %00000001
+000047r 2               THR_EMPTY_INT = %00000010
+000047r 2               ERROR_INT = %00000100
+000047r 2               MODEM_STATUS_INT = %00001000
+000047r 2               
+000047r 2               ;IIR (Interrupt Identification) constants
+000047r 2               IIR_DATA_AVAILABLE = %00000100
+000047r 2               IIR_ERROR = %00000110
+000047r 2               IIR_CHR_TIMEOUT = %00001100
+000047r 2               IIR_THR_EMPTY = %00000010
+000047r 2               IIR_MODEM_STATUS = %00000000
+000047r 2               
+000047r 2               ;DLL/DLM (Divisor Latch) constants
+000047r 2               DIV_4800_LO = 13
+000047r 2               DIV_4800_HI = 0
+000047r 2               
+000047r 2               DIV_9600_LO = 12
+000047r 2               DIV_9600_HI = 0
+000047r 2               
+000047r 2               DIV_38400_LO = 3
+000047r 2               DIV_38400_HI = 0
+000047r 2               
+000047r 2               
+000047r 2               ;zp.uart_flag bits
+000047r 2               ERROR_FLAG = %10000000
+000047r 2               OVERRUN_FLAG = %10000000
+000047r 2               PARITY_ERR_FLAG = %10000000
+000047r 2               FRAMING_ERR_FLAG = %10000000
+000047r 2               BREAK_INT_FLAG = %10000000
+000047r 2               
+000047r 2               
+000047r 2               ;Other constants
+000047r 2               UART_BUFFER_SIZE = 16
+000047r 2               
+000047r 2               ; Constants
+000047r 2               CR  = $0D ; Carriage Return
+000047r 2               LF  = $0A ; Line feed
+000047r 2               SP  = $20 ; Space
+000047r 2               ESC = $1B ; Escape
+000047r 2               
+000047r 2               UART_INIT:
+000047r 2  20 rr rr     	jsr init_9600
+00004Ar 2  60           	rts
+00004Br 2               
+00004Br 2               PrintString:
+00004Br 2  86 76        		STX T1
+00004Dr 2  84 77        		STY T1+1
+00004Fr 2  A0 00        		LDY #0
+000051r 2  B1 76        @loop:	LDA (T1),Y
+000053r 2  F0 06        		BEQ done
+000055r 2  20 rr rr     		JSR PrintChar
+000058r 2  C8           		INY
+000059r 2  D0 F6        		BNE @loop       ; if doesn't branch, string is too long
+00005Br 2  60           done:	RTS
+00005Cr 2               
+00005Cr 2               ClearScreen:
+00005Cr 2  A9 18        	lda #24
+00005Er 2  85 75        	sta Q
+000060r 2               @loop:
+000060r 2  A2 rr         	LDX #<LineClear
+000062r 2  A0 rr        	LDY #>LineClear
+000064r 2  20 rr rr     	jsr PrintString
+000067r 2  C6 75        	dec Q
+000069r 2  D0 F5        	bne @loop
+00006Br 2  60           	rts
+00006Cr 2               
+00006Cr 2               LineClear:
+00006Cr 2  20 20 20 20  	.byte "                                                                                ",CR,LF,0
+000070r 2  20 20 20 20  
+000074r 2  20 20 20 20  
+0000BFr 2               
+0000BFr 2               ;---------------------------------------------------------------------------------------
+0000BFr 2               ;Write a byte in A to the UART.
+0000BFr 2               ;Blocks until the UART is ready to send (transmitter holding register is empty)
+0000BFr 2               ;
+0000BFr 2               PrintChar:
+0000BFr 2               write_byte:
+0000BFr 2  48           	pha
+0000C0r 2               wait_for_thr_empty:
+0000C0r 2  AD 05 C0     	lda ULSR
+0000C3r 2  29 20        	and #THR_EMPTY
+0000C5r 2  F0 F9        	beq wait_for_thr_empty 									; loop while the THR is not empty
+0000C7r 2  68           	pla
+0000C8r 2  8D 00 C0     	sta THR 												; send the byte
+0000CBr 2  60           	rts
+0000CCr 2               
+0000CCr 2               ;---------------------------------------------------------------------------------------
+0000CCr 2               ;Initialize the UART
+0000CCr 2               ;Uses 8n1 mode with no FIFO and 4800 baud @ 1MHz clock
+0000CCr 2               ;
+0000CCr 2               init_9600:
+0000CCr 2  48               pha
+0000CDr 2  A9 80            lda #DLAB
+0000CFr 2  8D 03 C0         sta LCR                 ;set the divisor latch access bit (DLAB)
+0000D2r 2  A9 0C            lda #DIV_9600_LO
+0000D4r 2  8D 00 C0         sta DLL                 ;store divisor low byte (4800 baud @ 1 MHz clock)
+0000D7r 2  A9 00            lda #DIV_9600_HI
+0000D9r 2  8D 01 C0         sta DLM                 ;store divisor hi byte
+0000DCr 2                                           ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+0000DCr 2  A9 07            lda #FIFO_ENABLE
+0000DEr 2  8D 02 C0         sta FCR                 ;enable the UART FIFO
+0000E1r 2  A9 00            lda #POLLED_MODE
+0000E3r 2  8D 01 C0         sta IER                 ;disable all interrupts
+0000E6r 2  A9 03            lda #LCR_8N1
+0000E8r 2  8D 03 C0         sta LCR
+0000EBr 2  68               pla
+0000ECr 2  60               rts
+0000EDr 2               
+0000EDr 2               
+0000EDr 2               
+0000EDr 1               .include "../../libs/delay.s"
+0000EDr 2               ;-----------------------------------------------------------------------------------------
+0000EDr 2               ; Delay
+0000EDr 2               ;cpu clock..: 1.843.200 hz
+0000EDr 2               ;period.....: 0,542 ns
+0000EDr 2               ;deley total: 1,0 ms
+0000EDr 2               delay:
+0000EDr 2  A2 CD        	ldx  #$CD   ; (2 cycles)
+0000EFr 2               delay1:
+0000EFr 2  EA           	nop			; (2 cycles) 1us
+0000F0r 2  CA           	dex         ; (2 cycles) 1us
+0000F1r 2  D0 FC        	bne  delay1 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+0000F3r 2  60           	rts
+0000F4r 2               
+0000F4r 1               .include "drv8255a.s"
+0000F4r 2               ;Driver for P8255A
+0000F4r 2               
+0000F4r 2               PORTA = $C100
+0000F4r 2               PORTB = $C101
+0000F4r 2               PORTC = $C102
+0000F4r 2               DDR   = $C103
+0000F4r 2               
+0000F4r 2               
+0000F4r 2               init_8255:
+0000F4r 2  A5 80            lda $80
+0000F6r 2  8D 03 C1         sta DDR
+0000F9r 2  60               rts
+0000FAr 2               
+0000FAr 2               
+0000FAr 2               
+0000FAr 2               
+0000FAr 1               
+0000FAr 1               WelcomeMessage:
+0000FAr 1  53 50 41 52  	.byte "SPARTAN - Test of P8255A...",CR,LF,0
+0000FEr 1  54 41 4E 20  
+000102r 1  2D 20 54 65  
+000118r 1               
+000118r 1               
+000118r 1               ;Cpu reset address
+000118r 1               .segment    "RESETVEC"
+000000r 1               
+000000r 1  00 0F        	.word   $0F00
+000002r 1  rr rr        	.word   RESET
+000004r 1  00 00        	.word   $0000
+000004r 1               

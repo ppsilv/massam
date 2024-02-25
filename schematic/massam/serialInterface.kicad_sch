@@ -5,11 +5,11 @@
   (paper "A4")
 
   (title_block
-    (title "SPARTAN")
+    (title "HMC56")
     (date "2024-02-11")
     (rev "A")
     (company "Open Software")
-    (comment 1 "Retro computer SPARTAN using 65C02")
+    (comment 1 "Retro computer HMC56 using R6502")
     (comment 2 "Paulo da Silva (pdsilva)")
     (comment 3 "ppsilv gmail com")
   )

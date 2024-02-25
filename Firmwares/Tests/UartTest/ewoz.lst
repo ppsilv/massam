@@ -1,0 +1,623 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : ewoz.s
+Current file: ewoz.s
+
+000000r 1               ;EWoz 1.0
+000000r 1               ;by fsafstrom » Mar Wed 14, 2007 12:23 pm
+000000r 1               ;http://www.brielcomputers.com/phpBB3/viewtopic.php?f=9&t=197#p888
+000000r 1               ;via http://jefftranter.blogspot.co.uk/2012/05/woz-mon.html
+000000r 1               ;
+000000r 1               ;The EWoz 1.0 is just the good old Woz mon with a few improvements and extensions so to say.
+000000r 1               ;
+000000r 1               ;It's using ACIA @ 19200 Baud.
+000000r 1               ;It prints a small welcome message when started.
+000000r 1               ;All key strokes are converted to uppercase.
+000000r 1               ;The backspace works so the _ is no longer needed.
+000000r 1               ;When you run a program, it's called with an JSR so if the program ends with an RTS, you will be taken back to the monitor.
+000000r 1               ;You can load Intel HEX format files and it keeps track of the checksum.
+000000r 1               ;To load an Intel Hex file, just type L and hit return.
+000000r 1               ;Now just send a Text file that is in the Intel HEX Format just as you would send a text file for the Woz mon.
+000000r 1               ;You can abort the transfer by hitting ESC.
+000000r 1               ;
+000000r 1               ;The reason for implementing a loader for HEX files is the 6502 Assembler @ http://home.pacbell.net/michal_k/6502.html
+000000r 1               ;This assembler saves the code as Intel HEX format.
+000000r 1               ;
+000000r 1               ;In the future I might implement XModem, that is if anyone would have any use for it...
+000000r 1               ;
+000000r 1               ;Enjoy...
+000000r 1               ;
+000000r 1               ;7000: D8 58 A9 1F 8D 03 C0 A9 0B 8D 02 C0 A9 0D 20 2A
+000000r 1               ;7010: 71 A9 2F 85 2C A9 72 85 2D 20 39 71 A9 0D 20 2A
+000000r 1               ;7020: 71 A9 9B C9 88 F0 13 C9 9B F0 03 C8 10 19 A9 DC
+000000r 1               ;7030: 20 2A 71 A9 8D 20 2A 71 A0 01 88 30 F6 A9 A0 20
+000000r 1               ;7040: 2A 71 A9 88 20 2A 71 AD 01 C0 29 08 F0 F9 AD 00
+000000r 1               ;7050: C0 C9 60 30 02 29 5F 09 80 99 00 02 20 2A 71 C9
+000000r 1               ;7060: 8D D0 C0 A0 FF A9 00 AA 0A 85 2B C8 B9 00 02 C9
+000000r 1               ;7070: 8D F0 C0 C9 AE 90 F4 F0 F0 C9 BA F0 EB C9 D2 F0
+000000r 1               ;7080: 31 C9 CC F0 36 86 28 86 29 84 2A B9 00 02 49 B0
+000000r 1               ;7090: C9 0A 90 06 69 88 C9 FA 90 11 0A 0A 0A 0A A2 04
+000000r 1               ;70A0: 0A 26 28 26 29 CA D0 F8 C8 D0 E0 C4 2A D0 12 4C
+000000r 1               ;70B0: 2E 70 20 B8 70 4C 21 70 6C 24 00 20 46 71 4C 21
+000000r 1               ;70C0: 70 24 2B 50 0D A5 28 81 26 E6 26 D0 9F E6 27 4C
+000000r 1               ;70D0: 6C 70 30 2B A2 02 B5 27 95 25 95 23 CA D0 F7 D0
+000000r 1               ;70E0: 14 A9 8D 20 2A 71 A5 25 20 17 71 A5 24 20 17 71
+000000r 1               ;70F0: A9 BA 20 2A 71 A9 A0 20 2A 71 A1 24 20 17 71 86
+000000r 1               ;7100: 2B A5 24 C5 28 A5 25 E5 29 B0 C4 E6 24 D0 02 E6
+000000r 1               ;7110: 25 A5 24 29 0F 10 C8 48 4A 4A 4A 4A 20 20 71 68
+000000r 1               ;7120: 29 0F 09 B0 C9 BA 90 02 69 06 48 29 7F 8D 00 C0
+000000r 1               ;7130: AD 01 C0 29 10 F0 F9 68 60 A0 00 B1 2C F0 06 20
+000000r 1               ;7140: 2A 71 C8 D0 F6 60 A9 0D 20 2A 71 A9 44 85 2C A9
+000000r 1               ;7150: 72 85 2D 20 39 71 A9 0D 20 2A 71 A0 00 84 30 20
+000000r 1               ;7160: 24 72 99 00 02 C8 C9 1B F0 67 C9 0D D0 F1 A0 FF
+000000r 1               ;7170: C8 B9 00 02 C9 3A D0 F8 C8 A2 00 86 2F 20 01 72
+000000r 1               ;7180: 85 2E 18 65 2F 85 2F 20 01 72 85 27 18 65 2F 85
+000000r 1               ;7190: 2F 20 01 72 85 26 18 65 2F 85 2F A9 2E 20 2A 71
+000000r 1               ;71A0: 20 01 72 C9 01 F0 2A 18 65 2F 85 2F 20 01 72 81
+000000r 1               ;71B0: 26 18 65 2F 85 2F E6 26 D0 02 E6 27 C6 2E D0 EC
+000000r 1               ;71C0: 20 01 72 A0 00 18 65 2F F0 95 A9 01 85 30 4C 5F
+000000r 1               ;71D0: 71 A5 30 F0 16 A9 0D 20 2A 71 A9 7A 85 2C A9 72
+000000r 1               ;71E0: 85 2D 20 39 71 A9 0D 20 2A 71 60 A9 0D 20 2A 71
+000000r 1               ;71F0: A9 63 85 2C A9 72 85 2D 20 39 71 A9 0D 20 2A 71
+000000r 1               ;7200: 60 B9 00 02 49 30 C9 0A 90 02 69 08 0A 0A 0A 0A
+000000r 1               ;7210: 85 28 C8 B9 00 02 49 30 C9 0A 90 02 69 08 29 0F
+000000r 1               ;7220: 05 28 C8 60 AD 01 C0 29 08 F0 F9 AD 00 C0 60 57
+000000r 1               ;7230: 65 6C 63 6F 6D 65 20 74 6F 20 45 57 4F 5A 20 31
+000000r 1               ;7240: 2E 30 2E 00 53 74 61 72 74 20 49 6E 74 65 6C 20
+000000r 1               ;7250: 48 65 78 20 63 6F 64 65 20 54 72 61 6E 73 66 65
+000000r 1               ;7260: 72 2E 00 49 6E 74 65 6C 20 48 65 78 20 49 6D 70
+000000r 1               ;7270: 6F 72 74 65 64 20 4F 4B 2E 00 49 6E 74 65 6C 20
+000000r 1               ;7280: 48 65 78 20 49 6D 70 6F 72 74 65 64 20 77 69 74
+000000r 1               ;7290: 68 20 63 68 65 63 6B 73 75 6D 20 65 72 72 6F 72
+000000r 1               ;72A0: 2E 00
+000000r 1               ;
+000000r 1               ; EWOZ Extended Woz Monitor.
+000000r 1               ; Just a few mods to the original monitor.
+000000r 1               
+000000r 1               ; START @ $7000
+000000r 1               ;*           = $7000
+000000r 1               .setcpu "6502"
+000000r 1               .segment "UART"
+000000r 1               
+000000r 1               ;Exemplo https://github.com/ppsilv/6502/blob/master/asm/6551acia/jmon.s
+000000r 1               
+000000r 1               ;Uart registers
+000000r 1               RBR  = $C000    ;;receiver buffer register (read only)
+000000r 1               THR  = $C000    ;;transmitter holding register (write only)
+000000r 1               IER  = $C001    ;;interrupt enable register
+000000r 1               IIR  = $C002    ;;interrupt identification register
+000000r 1               FCR  = $C002    ;;FIFO control register
+000000r 1               LCR  = $C003    ;;line control register
+000000r 1               MCR  = $C004    ;;modem control register
+000000r 1               ULSR = $C005    ;;line status register
+000000r 1               MSR  = $C006    ;;modem status register
+000000r 1               DLL  = $C000    ;;divisor latch LSB (if DLAB=1)
+000000r 1               DLM  = $C001    ;;divisor latch MSB (if DLAB=1)
+000000r 1               
+000000r 1               ;FCR (FIFO Control) constants
+000000r 1               NO_FIFO = %00000000
+000000r 1               FIFO_ENABLE = %00000111
+000000r 1               
+000000r 1               ;LCR (Line Control) constants
+000000r 1               LCR_8N1 = %00000011
+000000r 1               DLAB = %10000000
+000000r 1               
+000000r 1               ;LSR (Line Status) constants
+000000r 1               DATA_READY = %00000001
+000000r 1               OVERRUN_ERR = %00000010
+000000r 1               PARITY_ERR = %00000100
+000000r 1               FRAMING_ERR = %00001000
+000000r 1               BREAK_INT = %00010000
+000000r 1               THR_EMPTY = %00100000
+000000r 1               TX_EMPTY = %01000000
+000000r 1               RX_FIFO_ERR = %10000000
+000000r 1               
+000000r 1               ;IER (Interrupt Enable) constants
+000000r 1               POLLED_MODE = %00000000
+000000r 1               DATA_INT = %00000001
+000000r 1               THR_EMPTY_INT = %00000010
+000000r 1               ERROR_INT = %00000100
+000000r 1               MODEM_STATUS_INT = %00001000
+000000r 1               
+000000r 1               ;IIR (Interrupt Identification) constants
+000000r 1               IIR_DATA_AVAILABLE = %00000100
+000000r 1               IIR_ERROR = %00000110
+000000r 1               IIR_CHR_TIMEOUT = %00001100
+000000r 1               IIR_THR_EMPTY = %00000010
+000000r 1               IIR_MODEM_STATUS = %00000000
+000000r 1               
+000000r 1               ;DLL/DLM (Divisor Latch) constants
+000000r 1               DIV_4800_LO = 13
+000000r 1               DIV_4800_HI = 0
+000000r 1               
+000000r 1               DIV_9600_LO = 12
+000000r 1               DIV_9600_HI = 0
+000000r 1               
+000000r 1               DIV_38400_LO = 3
+000000r 1               DIV_38400_HI = 0
+000000r 1               
+000000r 1               
+000000r 1               ;zp.uart_flag bits
+000000r 1               ERROR_FLAG = %10000000
+000000r 1               OVERRUN_FLAG = %10000000
+000000r 1               PARITY_ERR_FLAG = %10000000
+000000r 1               FRAMING_ERR_FLAG = %10000000
+000000r 1               BREAK_INT_FLAG = %10000000
+000000r 1               
+000000r 1               
+000000r 1               ;Other constants
+000000r 1               UART_BUFFER_SIZE = 16
+000000r 1               
+000000r 1               ; Constants
+000000r 1               CR  = $0D ; Carriage Return
+000000r 1               LF  = $0A ; Line feed
+000000r 1               SP  = $20 ; Space
+000000r 1               ESC = $1B ; Escape
+000000r 1               
+000000r 1               ; Page Zero locations
+000000r 1               ;Block 0
+000000r 1               ;------------------------------------
+000000r 1               ;Zero page general-purpose addresses
+000000r 1               ;("extra registers" to augment A, X, Y)
+000000r 1               B        = $00
+000000r 1               C        = $01
+000000r 1               D        = $02
+000000r 1               E        = $03
+000000r 1               F        = $04
+000000r 1               G        = $05
+000000r 1               H        = $06
+000000r 1               I        = $07
+000000r 1               J        = $08
+000000r 1               K        = $09
+000000r 1               L        = $0a
+000000r 1               M        = $0b
+000000r 1               N        = $0c
+000000r 1               O        = $0d
+000000r 1               P        = $0e
+000000r 1               Q        = $0f
+000000r 1               XAML     = $24            ;*Index pointers
+000000r 1               XAMH     = $25
+000000r 1               STL      = $26
+000000r 1               STH      = $27
+000000r 1               YSAV     = $2A
+000000r 1               MODE     = $2B
+000000r 1               MSGL     = $2C
+000000r 1               MSGH     = $2D
+000000r 1               COUNTER  = $2E
+000000r 1               CRC      = $2F
+000000r 1               CRCCHECK = $30
+000000r 1               T1       = $35      ; temp variable 1
+000000r 1               T2       = $36      ; temp variable 2
+000000r 1               SL       = $37      ; start address low byte
+000000r 1               SH       = $38      ; start address high byte
+000000r 1               EL       = $39      ; end address low byte
+000000r 1               EH       = $3A      ; end address high byte
+000000r 1               DA       = $3F      ; fill data byte
+000000r 1               DL       = $40      ; destination address low byte
+000000r 1               DH       = $41      ; destination address high byte
+000000r 1               BIN      = $42      ; holds binary value low byte
+000000r 1               BINH     = $43      ; holds binary value high byte
+000000r 1               BCD      = $44      ; holds BCD decimal number
+000000r 1               BCD2     = $45      ; holds BCD decimal number
+000000r 1               BCD3     = $46      ; holds BCD decimal number
+000000r 1               LZ       = $47      ; boolean for leading zero suppression
+000000r 1               LAST     = $48      ; boolean for leading zero suppression / indicates last byte
+000000r 1               IN       = $0200          ;*Input buffer
+000000r 1               
+000000r 1               
+000000r 1               RESET:
+000000r 1  D8              CLD             ;Clear decimal arithmetic mode.
+000001r 1  58              CLI
+000002r 1  78              sei						; No interrupt
+000003r 1  D8              cld						; Set decimal
+000004r 1  A2 FF           ldx #$ff				; Set stack pointer
+000006r 1  9A              txs						;
+000007r 1  20 rr rr        jsr init_9600			; Configure uart to 9600 baudrate
+00000Ar 1               
+00000Ar 1  A9 0A           LDA #$0A
+00000Cr 1  20 rr rr        JSR ECHO          ;* New line.
+00000Fr 1  A9 0A           LDA #$0A
+000011r 1  20 rr rr        JSR ECHO          ;* New line.
+000014r 1  A9 rr           LDA #<MSG1
+000016r 1  85 2C           STA MSGL
+000018r 1  A9 rr           LDA #>MSG1
+00001Ar 1  85 2D           STA MSGH
+00001Cr 1  20 rr rr        JSR SHWMSG        ;* Show Welcome.
+00001Fr 1               SOFTRESET:
+00001Fr 1  A9 1B           LDA #$1B          ;* Auto escape.
+000021r 1               NOTCR:
+000021r 1  C9 08           CMP #$08        ;"<-"? * Note this was changed to $88 which is the back space key.
+000023r 1  F0 13           BEQ BACKSPACE   ;Yes.
+000025r 1  C9 1B           CMP #$1B        ;ESC?
+000027r 1  F0 03           BEQ ESCAPE      ;Yes.
+000029r 1  C8              INY             ;Advance text index.
+00002Ar 1  10 19           BPL NEXTCHAR    ;Auto ESC if >127.
+00002Cr 1               ESCAPE:
+00002Cr 1  A9 5C           LDA #$5C        ;"\"
+00002Er 1  20 rr rr        JSR ECHO        ;Output it.
+000031r 1               GETLINE:
+000031r 1  A9 0A           LDA #$0A        ;CR.
+000033r 1  20 rr rr        JSR ECHO        ;Output it.
+000036r 1  A0 01           LDY #$01        ;Initiallize text index.
+000038r 1               BACKSPACE:
+000038r 1  88              DEY             ;Backup text index.
+000039r 1  30 F6           BMI GETLINE     ;Beyond start of line, reinitialize.
+00003Br 1  A9 08           LDA #$08      ;*Space, overwrite the backspaced char.
+00003Dr 1  20 rr rr        JSR ECHO
+000040r 1  A9 08           LDA #$08      ;*Backspace again to get to correct pos.
+000042r 1  20 rr rr        JSR ECHO
+000045r 1               NEXTCHAR:
+000045r 1                                  ;LDA ACIA_SR     ;*See if we got an incoming char
+000045r 1                                  ;AND #$08        ;*Test bit 3
+000045r 1                                  ;BEQ NEXTCHAR    ;*Wait for character
+000045r 1                                  ;LDA ACIA_DAT    ;*Load char
+000045r 1  20 rr rr        jsr   GETCHAR   ;*Load char
+000048r 1  C9 60           CMP #$60        ;*Is it Lower case
+00004Ar 1  30 02           BMI   CONVERT   ;*Nope, just convert it
+00004Cr 1  29 DF           AND #$DF        ;*If lower case, convert to Upper case
+00004Er 1               CONVERT:
+00004Er 1  99 00 02        STA IN,Y        ;Add to text buffer.
+000051r 1  20 rr rr        JSR ECHO        ;Display character.
+000054r 1  C9 0D           CMP #$0D        ;CR?
+000056r 1  D0 C9           BNE NOTCR       ;No.
+000058r 1  A0 FF           LDY #$FF        ;Reset text index.
+00005Ar 1  A9 00           LDA #$00        ;For XAM mode.
+00005Cr 1  AA              TAX             ;0->X.
+00005Dr 1               SETSTOR:
+00005Dr 1  0A              ASL             ;Leaves $7B if setting STOR mode.
+00005Er 1               SETMODE:
+00005Er 1  85 2B           STA MODE        ;$00 = XAM, $7B = STOR, $AE = BLOK XAM.
+000060r 1               BLSKIP:
+000060r 1  C8              INY             ;Advance text index.
+000061r 1               NEXTITEM:
+000061r 1  B9 00 02        LDA IN,Y        ;Get character.
+000064r 1  C9 0D           CMP #$0D        ;CR?
+000066r 1  F0 C9           BEQ GETLINE     ;Yes, done this line.
+000068r 1  C9 2E           CMP #$2E        ;"."?
+00006Ar 1  90 F4           BCC BLSKIP      ;Skip delimiter.
+00006Cr 1  F0 F0           BEQ SETMODE     ;Set BLOCK XAM mode.
+00006Er 1  C9 3A           CMP #$3A        ;":"?
+000070r 1  F0 EB           BEQ SETSTOR     ;Yes, set STOR mode.
+000072r 1  C9 52           CMP #$52        ;"R"?
+000074r 1  F0 31           BEQ RUN         ;Yes, run user program.
+000076r 1  C9 4C           CMP #$4C        ;* "L"?
+000078r 1  F0 36           BEQ LOADINT     ;* Yes, Load Intel Code.
+00007Ar 1  86 0A           STX L           ;$00->L.
+00007Cr 1  86 06           STX H           ; and H.
+00007Er 1  84 2A           STY YSAV        ;Save Y for comparison.
+000080r 1               NEXTHEX:
+000080r 1  B9 00 02        LDA IN,Y        ;Get character for hex test.
+000083r 1  49 30           EOR #$30        ;Map digits to $0-9.
+000085r 1  C9 0A           CMP #$0A        ;Digit?
+000087r 1  90 06           BCC DIG         ;Yes.
+000089r 1  69 88           ADC #$88        ;Map letter "A"-"F" to $FA-FF.
+00008Br 1  C9 FA           CMP #$FA        ;Hex letter?
+00008Dr 1  90 11           BCC NOTHEX      ;No, character not hex.
+00008Fr 1               DIG:
+00008Fr 1  0A              ASL
+000090r 1  0A              ASL             ;Hex digit to MSD of A.
+000091r 1  0A              ASL
+000092r 1  0A              ASL
+000093r 1  A2 04           LDX #$04        ;Shift count.
+000095r 1               HEXSHIFT:
+000095r 1  0A              ASL             ;Hex digit left MSB to carry.
+000096r 1  26 0A           ROL L           ;Rotate into LSD.
+000098r 1  26 06           ROL H           ;Rotate into MSD's.
+00009Ar 1  CA              DEX             ;Done 4 shifts?
+00009Br 1  D0 F8           BNE HEXSHIFT    ;No, loop.
+00009Dr 1  C8              INY             ;Advance text index.
+00009Er 1  D0 E0           BNE NEXTHEX     ;Always taken. Check next character for hex.
+0000A0r 1               NOTHEX:
+0000A0r 1  C4 2A           CPY YSAV        ;Check if L, H empty (no hex digits).
+0000A2r 1  D0 12           BNE NOESCAPE   ;* Branch out of range, had to improvise...
+0000A4r 1  4C rr rr        JMP ESCAPE      ;Yes, generate ESC sequence.
+0000A7r 1               
+0000A7r 1               RUN:
+0000A7r 1  20 rr rr        JSR ACTRUN      ;* JSR to the Address we want to run.
+0000AAr 1  4C rr rr        JMP   SOFTRESET   ;* When returned for the program, reset EWOZ.
+0000ADr 1               ACTRUN:
+0000ADr 1  6C 24 00        JMP (XAML)      ;Run at current XAM index.
+0000B0r 1               
+0000B0r 1               LOADINT:
+0000B0r 1  20 rr rr        JSR LOADINTEL   ;* Load the Intel code.
+0000B3r 1  4C rr rr        JMP   SOFTRESET   ;* When returned from the program, reset EWOZ.
+0000B6r 1               
+0000B6r 1               NOESCAPE:
+0000B6r 1  24 2B           BIT MODE        ;Test MODE byte.
+0000B8r 1  50 0D           BVC NOTSTOR     ;B6=0 for STOR, 1 for XAM and BLOCK XAM
+0000BAr 1  A5 0A           LDA L           ;LSD's of hex data.
+0000BCr 1  81 26           STA (STL, X)    ;Store at current "store index".
+0000BEr 1  E6 26           INC STL         ;Increment store index.
+0000C0r 1  D0 9F           BNE NEXTITEM    ;Get next item. (no carry).
+0000C2r 1  E6 27           INC STH         ;Add carry to 'store index' high order.
+0000C4r 1               TONEXTITEM:
+0000C4r 1  4C rr rr        JMP NEXTITEM    ;Get next command item.
+0000C7r 1               NOTSTOR:
+0000C7r 1  30 30           BMI XAMNEXT     ;B7=0 for XAM, 1 for BLOCK XAM.
+0000C9r 1  A2 02           LDX #$02        ;Byte count.
+0000CBr 1               SETADR:
+0000CBr 1  B5 09           LDA L-1,X       ;Copy hex data to
+0000CDr 1  95 25           STA STL-1,X     ;"store index".
+0000CFr 1  95 23           STA XAML-1,X    ;And to "XAM index'.
+0000D1r 1  CA              DEX             ;Next of 2 bytes.
+0000D2r 1  D0 F7           BNE SETADR      ;Loop unless X = 0.
+0000D4r 1               NXTPRNT:
+0000D4r 1  D0 19           BNE PRDATA      ;NE means no address to print.
+0000D6r 1  A9 0D           LDA #$0D        ;CR.
+0000D8r 1  20 rr rr        JSR ECHO        ;Output it.
+0000DBr 1  A9 0A           LDA #$0A
+0000DDr 1  20 rr rr        JSR ECHO        ;Output it.
+0000E0r 1  A5 25           LDA XAMH        ;'Examine index' high-order byte.
+0000E2r 1  20 rr rr        JSR PRBYTE      ;Output it in hex format.
+0000E5r 1  A5 24           LDA XAML        ;Low-order "examine index" byte.
+0000E7r 1  20 rr rr        JSR PRBYTE      ;Output it in hex format.
+0000EAr 1  A9 3A           LDA #$3A        ;":".
+0000ECr 1  20 rr rr        JSR ECHO        ;Output it.
+0000EFr 1               PRDATA:
+0000EFr 1  A9 20           LDA #$20        ;Blank.
+0000F1r 1  20 rr rr        JSR ECHO        ;Output it.
+0000F4r 1  A1 24           LDA (XAML,X)    ;Get data byte at 'examine index".
+0000F6r 1  20 rr rr        JSR PRBYTE      ;Output it in hex format.
+0000F9r 1               XAMNEXT:
+0000F9r 1  86 2B           STX MODE        ;0-> MODE (XAM mode).
+0000FBr 1  A5 24           LDA XAML
+0000FDr 1  C5 0A           CMP L           ;Compare 'examine index" to hex data.
+0000FFr 1  A5 25           LDA XAMH
+000101r 1  E5 06           SBC H
+000103r 1  B0 BF           BCS TONEXTITEM  ;Not less, so no more data to output.
+000105r 1  E6 24           INC XAML
+000107r 1  D0 02           BNE MOD8CHK     ;Increment 'examine index".
+000109r 1  E6 25           INC XAMH
+00010Br 1               MOD8CHK:
+00010Br 1  A5 24           LDA XAML        ;Check low-order 'exainine index' byte
+00010Dr 1  29 0F           AND #$0F        ;For MOD 8=0 ** changed to $0F to get 16 values per row **
+00010Fr 1  10 C3           BPL NXTPRNT     ;Always taken.
+000111r 1               PRBYTE:
+000111r 1  48              PHA             ;Save A for LSD.
+000112r 1  4A              LSR
+000113r 1  4A              LSR
+000114r 1  4A              LSR             ;MSD to LSD position.
+000115r 1  4A              LSR
+000116r 1  20 rr rr        JSR PRHEX       ;Output hex digit.
+000119r 1  68              PLA             ;Restore A.
+00011Ar 1               PRHEX:
+00011Ar 1  29 0F           AND #$0F        ;Mask LSD for hex print.
+00011Cr 1  09 30           ORA #$30        ;Add "0".
+00011Er 1  C9 3A           CMP #$3A        ;Digit?
+000120r 1  90 02           BCC ECHO        ;Yes, output it.
+000122r 1  69 06           ADC #$06        ;Add offset for letter.
+000124r 1               ECHO:
+000124r 1  48              PHA             ;*Save A
+000125r 1  20 rr rr        jsr PrintChar
+000128r 1  68              PLA             ;*Restore A
+000129r 1  60              RTS             ;*Done, over and out...
+00012Ar 1               
+00012Ar 1               PrintString:
+00012Ar 1               SHWMSG:
+00012Ar 1  A0 00           LDY #$0
+00012Cr 1               @PRINT:
+00012Cr 1  B1 2C           LDA (MSGL),Y
+00012Er 1  F0 06           BEQ @DONE
+000130r 1  20 rr rr        JSR ECHO
+000133r 1  C8              INY
+000134r 1  D0 F6           BNE @PRINT
+000136r 1               @DONE:
+000136r 1  60              RTS
+000137r 1               
+000137r 1               
+000137r 1               ; Load an program in Intel Hex Format.
+000137r 1               LOADINTEL:
+000137r 1  A9 0D           LDA #$0D
+000139r 1  20 rr rr        JSR ECHO      ;New line.
+00013Cr 1  A9 rr           LDA #<MSG2
+00013Er 1  85 2C           STA MSGL
+000140r 1  A9 rr           LDA #>MSG2
+000142r 1  85 2D           STA MSGH
+000144r 1  20 rr rr        JSR SHWMSG      ;Show Start Transfer.
+000147r 1  A9 0D           LDA #$0D
+000149r 1  20 rr rr        JSR ECHO      ;New line.
+00014Cr 1  A0 00           LDY #$00
+00014Er 1  84 30           STY CRCCHECK   ;If CRCCHECK=0, all is good.
+000150r 1               INTELLINE:
+000150r 1  20 rr rr        JSR GETCHAR      ;Get char
+000153r 1  99 00 02        STA IN,Y      ;Store it
+000156r 1  C8              INY            ;Next
+000157r 1  C9 1B           CMP   #$1B      ;Escape ?
+000159r 1  F0 67           BEQ   INTELDONE   ;Yes, abort.
+00015Br 1  C9 0D           CMP #$0D      ;Did we find a new line ?
+00015Dr 1  D0 F1           BNE INTELLINE   ;Nope, continue to scan line.
+00015Fr 1  A0 FF           LDY #$FF      ;Find (:)
+000161r 1               FINDCOL:
+000161r 1  C8              INY
+000162r 1  B9 00 02        LDA IN,Y
+000165r 1  C9 3A           CMP #$3A      ; Is it Colon ?
+000167r 1  D0 F8           BNE FINDCOL      ; Nope, try next.
+000169r 1  C8              INY            ; Skip colon
+00016Ar 1  A2 00           LDX   #$00      ; Zero in X
+00016Cr 1  86 2F           STX   CRC         ; Zero Check sum
+00016Er 1  20 rr rr        JSR GETHEX      ; Get Number of bytes.
+000171r 1  85 2E           STA COUNTER      ; Number of bytes in Counter.
+000173r 1  18              CLC            ; Clear carry
+000174r 1  65 2F           ADC CRC         ; Add CRC
+000176r 1  85 2F           STA CRC         ; Store it
+000178r 1  20 rr rr        JSR GETHEX      ; Get Hi byte
+00017Br 1  85 27           STA STH         ; Store it
+00017Dr 1  18              CLC            ; Clear carry
+00017Er 1  65 2F           ADC CRC         ; Add CRC
+000180r 1  85 2F           STA CRC         ; Store it
+000182r 1  20 rr rr        JSR GETHEX      ; Get Lo byte
+000185r 1  85 26           STA STL         ; Store it
+000187r 1  18              CLC            ; Clear carry
+000188r 1  65 2F           ADC CRC         ; Add CRC
+00018Ar 1  85 2F           STA CRC         ; Store it
+00018Cr 1  A9 2E           LDA #$2E      ; Load "."
+00018Er 1  20 rr rr        JSR ECHO      ; Print it to indicate activity.
+000191r 1               NODOT:
+000191r 1  20 rr rr        JSR GETHEX      ; Get Control byte.
+000194r 1  C9 01           CMP   #$01      ; Is it a Termination record ?
+000196r 1  F0 2A           BEQ   INTELDONE   ; Yes, we are done.
+000198r 1  18              CLC            ; Clear carry
+000199r 1  65 2F           ADC CRC         ; Add CRC
+00019Br 1  85 2F           STA CRC         ; Store it
+00019Dr 1               INTELSTORE:
+00019Dr 1  20 rr rr        JSR GETHEX      ; Get Data Byte
+0001A0r 1  81 26           STA (STL,X)      ; Store it
+0001A2r 1  18              CLC            ; Clear carry
+0001A3r 1  65 2F           ADC CRC         ; Add CRC
+0001A5r 1  85 2F           STA CRC         ; Store it
+0001A7r 1  E6 26           INC STL         ; Next Address
+0001A9r 1  D0 02           BNE TESTCOUNT   ; Test to see if Hi byte needs INC
+0001ABr 1  E6 27           INC STH         ; If so, INC it.
+0001ADr 1               TESTCOUNT:
+0001ADr 1  C6 2E           DEC   COUNTER      ; Count down.
+0001AFr 1  D0 EC           BNE INTELSTORE   ; Next byte
+0001B1r 1  20 rr rr        JSR GETHEX      ; Get Checksum
+0001B4r 1  A0 00           LDY #$00      ; Zero Y
+0001B6r 1  18              CLC            ; Clear carry
+0001B7r 1  65 2F           ADC CRC         ; Add CRC
+0001B9r 1  F0 95           BEQ INTELLINE   ; Checksum OK.
+0001BBr 1  A9 01           LDA #$01      ; Flag CRC error.
+0001BDr 1  85 30           STA   CRCCHECK   ; Store it
+0001BFr 1  4C rr rr        JMP INTELLINE   ; Process next line.
+0001C2r 1               
+0001C2r 1               INTELDONE:
+0001C2r 1  A5 30           LDA CRCCHECK   ; Test if everything is OK.
+0001C4r 1  F0 16           BEQ OKMESS      ; Show OK message.
+0001C6r 1  A9 0D           LDA #$0D
+0001C8r 1  20 rr rr        JSR ECHO      ;New line.
+0001CBr 1  A9 rr           LDA #<MSG4      ; Load Error Message
+0001CDr 1  85 2C           STA MSGL
+0001CFr 1  A9 rr           LDA #>MSG4
+0001D1r 1  85 2D           STA MSGH
+0001D3r 1  20 rr rr        JSR SHWMSG      ;Show Error.
+0001D6r 1  A9 0D           LDA #$0D
+0001D8r 1  20 rr rr        JSR ECHO      ;New line.
+0001DBr 1  60              RTS
+0001DCr 1               
+0001DCr 1               OKMESS:
+0001DCr 1  A9 0D           LDA #$0D
+0001DEr 1  20 rr rr        JSR ECHO      ;New line.
+0001E1r 1  A9 rr           LDA #<MSG3      ;Load OK Message.
+0001E3r 1  85 2C           STA MSGL
+0001E5r 1  A9 rr           LDA #>MSG3
+0001E7r 1  85 2D           STA MSGH
+0001E9r 1  20 rr rr        JSR SHWMSG      ;Show Done.
+0001ECr 1  A9 0D           LDA #$0D
+0001EEr 1  20 rr rr        JSR ECHO      ;New line.
+0001F1r 1  60              RTS
+0001F2r 1               
+0001F2r 1               GETHEX:
+0001F2r 1  B9 00 02        LDA IN,Y      ;Get first char.
+0001F5r 1  49 30           EOR #$30
+0001F7r 1  C9 0A           CMP #$0A
+0001F9r 1  90 02           BCC DONEFIRST
+0001FBr 1  69 08           ADC #$08
+0001FDr 1               DONEFIRST:
+0001FDr 1  0A              ASL
+0001FEr 1  0A              ASL
+0001FFr 1  0A              ASL
+000200r 1  0A              ASL
+000201r 1  85 0A           STA L
+000203r 1  C8              INY
+000204r 1  B9 00 02        LDA IN,Y      ;Get next char.
+000207r 1  49 30           EOR #$30
+000209r 1  C9 0A           CMP #$0A
+00020Br 1  90 02           BCC DONESECOND
+00020Dr 1  69 08           ADC #$08
+00020Fr 1               DONESECOND:
+00020Fr 1  29 0F           AND #$0F
+000211r 1  05 0A           ORA L
+000213r 1  C8              INY
+000214r 1  60              RTS
+000215r 1               ;/* ---------------------------------------------------------------------------------------
+000215r 1               ;Write a byte in A to the UART.
+000215r 1               ;Blocks until the UART is ready to send (transmitter holding register is empty)
+000215r 1               ;*/
+000215r 1               PrintChar:
+000215r 1               write_byte:
+000215r 1  48           	pha
+000216r 1               wait_for_thr_empty:
+000216r 1  AD 05 C0     	lda ULSR
+000219r 1  29 20        	and #THR_EMPTY
+00021Br 1  F0 F9        	beq wait_for_thr_empty 									; loop while the THR is not empty
+00021Dr 1  68           	pla
+00021Er 1  8D 00 C0     	sta THR 												; send the byte
+000221r 1  60           	rts
+000222r 1               ;/* ---------------------------------------------------------------------------------------
+000222r 1               ;Read a byte from the UART into A. Blocks until a byte is available.
+000222r 1               ;If there was an error, set the C flag.
+000222r 1               ;C flag clear means a byte was successfully read into A.
+000222r 1               ;*/
+000222r 1               GETCHAR:
+000222r 1               read_byte:
+000222r 1  AD 05 C0     	lda ULSR 														; check the line status register
+000225r 1  29 1E        	and #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT) 	; check for errors
+000227r 1  F0 05        	beq no_err 												  	; if no error bits, are set, no erro	r
+000229r 1  AD 00 C0     	lda RBR 												  	; otherwise, there was an error. Clear the error byt	e
+00022Cr 1  38           	sec 															  	; set the carry flag to indicate erro	r
+00022Dr 1  60           	rts
+00022Er 1               
+00022Er 1               no_err:
+00022Er 1  AD 05 C0     	lda ULSR 												; reload the line status register
+000231r 1  29 01        	and #DATA_READY
+000233r 1  F0 ED        	beq read_byte 											; if data ready is not set, loop
+000235r 1  AD 00 C0     	lda RBR 												; otherwise, we have data! Load it.
+000238r 1  18           	clc 													; clear the carry flag to indicate no error
+000239r 1  60           	rts
+00023Ar 1               
+00023Ar 1  0A 0A 0A 0A  MSG1:      .byte $0A,$0A,$0A,$0A,$0A,"Welcome to EWOZ 1.0.",$0D,$0A,0
+00023Er 1  0A 57 65 6C  
+000242r 1  63 6F 6D 65  
+000256r 1  53 74 61 72  MSG2:      .byte "Start Intel Hex code Transfer.",$0A,0
+00025Ar 1  74 20 49 6E  
+00025Er 1  74 65 6C 20  
+000276r 1  49 6E 74 65  MSG3:      .byte "Intel Hex Imported OK.",$0A,0
+00027Ar 1  6C 20 48 65  
+00027Er 1  78 20 49 6D  
+00028Er 1  49 6E 74 65  MSG4:      .byte "Intel Hex Imported with checksum error.",$0A,0
+000292r 1  6C 20 48 65  
+000296r 1  78 20 49 6D  
+0002B7r 1  20 20 20 20  LineClear: .byte "                                                                                ",CR,LF,0
+0002BBr 1  20 20 20 20  
+0002BFr 1  20 20 20 20  
+00030Ar 1               
+00030Ar 1               ClearScreen:
+00030Ar 1  A9 18        	lda #24
+00030Cr 1  85 0F        	sta Q
+00030Er 1               @loop:
+00030Er 1  A2 rr         	LDX #<LineClear
+000310r 1  A0 rr        	LDY #>LineClear
+000312r 1  20 rr rr     	jsr PrintString
+000315r 1  C6 0F        	dec Q
+000317r 1  D0 F5        	bne @loop
+000319r 1  60           	rts
+00031Ar 1               
+00031Ar 1               
+00031Ar 1               ;---------------------------------------------------------------------------------------
+00031Ar 1               ;Initialize the UART
+00031Ar 1               ;Uses 8n1 mode with no FIFO and 4800 baud @ 1MHz clock
+00031Ar 1               ;
+00031Ar 1               init_9600:
+00031Ar 1  48               pha
+00031Br 1  A9 80            lda #DLAB
+00031Dr 1  8D 03 C0         sta LCR                 ;set the divisor latch access bit (DLAB)
+000320r 1  A9 0C            lda #DIV_9600_LO
+000322r 1  8D 00 C0         sta DLL                 ;store divisor low byte (4800 baud @ 1 MHz clock)
+000325r 1  A9 00            lda #DIV_9600_HI
+000327r 1  8D 01 C0         sta DLM                 ;store divisor hi byte
+00032Ar 1                                           ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+00032Ar 1  A9 07            lda #FIFO_ENABLE
+00032Cr 1  8D 02 C0         sta FCR                 ;enable the UART FIFO
+00032Fr 1  A9 00            lda #POLLED_MODE
+000331r 1  8D 01 C0         sta IER                 ;disable all interrupts
+000334r 1  A9 03            lda #LCR_8N1
+000336r 1  8D 03 C0         sta LCR
+000339r 1  68               pla
+00033Ar 1  60               rts
+00033Br 1               
+00033Br 1               ;Cpu reset address
+00033Br 1               .segment    "RESETVEC"
+000000r 1               
+000000r 1  00 0F                    .word   $0F00
+000002r 1  rr rr                    .word   RESET
+000004r 1  00 00                    .word   $0000
+000004r 1               
