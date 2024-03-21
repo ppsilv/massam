@@ -142,11 +142,10 @@ init_38400:
     sta FCR                                                 // enable the UART FIFO
 
     lda #POLLED_MODE
-    sta uart.IER                                                 // disable all interrupts
+    sta uart.IER                                            // disable all interrupts
 
     lda #LCR_8N1
-    sta LCR                                                 // set 8 data bits, 1 stop bit, no parity, disable DLAB                                             // set 8 data bits, 1 stop bit, no parity, disable DLAB
-
+    sta LCR                                                 // set 8 data bits, 1 stop bit, no parity, disable DLAB
 
     pla
     rts
@@ -315,7 +314,7 @@ no_x_carry:
 //     cmp #uart.DATA_AVAILABLE                                // check for UART interrupt      
 //     bne done                           						// if no data is available, done
 
-//     lda uart.RBR    		                                // clear UART interrupt and load available data
+//     lda uart.RBR    		                                	// clear UART interrupt and load available data
 //     ldx zp.uart_write_ptr	
 //     sta zp.uart_buffer,x                                   	// store received byte in buffer
 //     inx                                                  	// increment write pointer

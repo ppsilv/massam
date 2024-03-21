@@ -16967,9 +16967,6 @@
     (path "/bb73bc20-51d9-4832-acd6-d820b56cbbf6/f4e04d6c-ca05-486f-a2bd-17f6b0e8835b"
       (reference "#PWR0121") (unit 1) (value "GNDREF") (footprint "")
     )
-    (path "/4d15044e-ba42-49c7-9385-a61cb67a80bd/0400e048-82b3-4358-900a-51dd33a95b58"
-      (reference "#PWR?") (unit 1) (value "GNDREF") (footprint "")
-    )
     (path "/81f8d90f-b399-4f33-998f-520e13bbf745/074fbb63-27bb-454c-882c-9d184919c1f7"
       (reference "#PWR?") (unit 1) (value "GNDREF") (footprint "")
     )
@@ -17012,6 +17009,9 @@
     (path "/4d15044e-ba42-49c7-9385-a61cb67a80bd/631faf12-5aff-4f26-a794-3a3da24b171d"
       (reference "#PWR?") (unit 1) (value "GNDREF") (footprint "")
     )
+    (path "/4d15044e-ba42-49c7-9385-a61cb67a80bd/72372bed-8596-4da0-a186-7dd76adc4c2b"
+      (reference "#PWR?") (unit 1) (value "+5V") (footprint "")
+    )
     (path "/4d15044e-ba42-49c7-9385-a61cb67a80bd/754c6c44-fc3b-4879-a15a-5ebb1bb9b818"
       (reference "#PWR?") (unit 1) (value "+5V") (footprint "")
     )
@@ -17019,9 +17019,6 @@
       (reference "#PWR?") (unit 1) (value "VCC") (footprint "")
     )
     (path "/4d15044e-ba42-49c7-9385-a61cb67a80bd/7f96af27-0894-4332-82e7-8a43e9cb2c6b"
-      (reference "#PWR?") (unit 1) (value "GNDREF") (footprint "")
-    )
-    (path "/81f8d90f-b399-4f33-998f-520e13bbf745/812e54cf-e4c5-413c-9f0c-3a735a18abe0"
       (reference "#PWR?") (unit 1) (value "GNDREF") (footprint "")
     )
     (path "/81f8d90f-b399-4f33-998f-520e13bbf745/820a1dec-ec45-42dc-a72e-842b5f782f06"
@@ -17166,13 +17163,10 @@
       (reference "J?") (unit 1) (value "Conn_02x40_Row_Letter_First") (footprint "")
     )
     (path "/4d15044e-ba42-49c7-9385-a61cb67a80bd/d0d0eb9d-c1e4-47bb-9562-5789347b04f4"
-      (reference "R1") (unit 1) (value "1k8") (footprint "")
+      (reference "R1") (unit 1) (value "1k") (footprint "")
     )
     (path "/4d15044e-ba42-49c7-9385-a61cb67a80bd/2369cff2-508c-4f84-ac99-d8ce6e3bcf34"
-      (reference "R2") (unit 1) (value "1k8") (footprint "")
-    )
-    (path "/4d15044e-ba42-49c7-9385-a61cb67a80bd/2905bf67-283d-4098-aeb1-7bd5f1d12ef0"
-      (reference "R3") (unit 1) (value "33K") (footprint "")
+      (reference "R2") (unit 1) (value "1k") (footprint "")
     )
     (path "/bb73bc20-51d9-4832-acd6-d820b56cbbf6/2b3ef4a4-78da-4979-a55e-7946824ccaa0"
       (reference "R3") (unit 1) (value "1K") (footprint "")

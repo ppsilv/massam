@@ -1,0 +1,145 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : cpuTest.s
+Current file: cpuTest.s
+
+000000r 1               .setcpu "65C02"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               RBR         = $C000    ;;receiver buffer register (read only)
+000000r 1               THR         = $C000    ;;transmitter holding register (write only)
+000000r 1               DLL         = $C000    ;;divisor latch LSB (if DLAB=1)
+000000r 1               DLH         = $C001    ;;divisor latch HSB (if DLAB=1)
+000000r 1               IER         = $C001    ;;interrupt enable register
+000000r 1               IIR         = $C002    ;;interrupt identification register
+000000r 1               FCR         = $C002    ;;FIFO control register
+000000r 1               LCR         = $C003    ;;line control register
+000000r 1               MCR         = $C004    ;;modem control register
+000000r 1               ULSR        = $C005    ;;line status register
+000000r 1               MSR         = $C006    ;;modem status register
+000000r 1               SCR	        = $C007	   ;;scratch register
+000000r 1               
+000000r 1               ; Constants
+000000r 1               CR  = $0D ; Carriage Return
+000000r 1               LF  = $0A ; Line feed
+000000r 1               SP  = $20 ; Space
+000000r 1               ESC = $1B ; Escape
+000000r 1               
+000000r 1               DIV_9600_LO = 12
+000000r 1               DIV_9600_HI = 0
+000000r 1               POLLED_MODE = %00000000
+000000r 1               LCR_8N1 = %00000011
+000000r 1               DLAB    = %10000000
+000000r 1               FIFO_ENABLE = %00000111 ;%00000111
+000000r 1               THR_EMPTY = %01100000       ;;
+000000r 1               
+000000r 1               DATA_READY = %00000001
+000000r 1               OVERRUN_ERR = %00000010
+000000r 1               PARITY_ERR = %00000100
+000000r 1               FRAMING_ERR = %00001000
+000000r 1               BREAK_INT = %00010000
+000000r 1               
+000000r 1               RESET:
+000000r 1  78           	sei						; No interrupt
+000001r 1  D8           	cld						; Set decimal
+000002r 1  A2 FF        	ldx #$ff				; Set stack pointer
+000004r 1  9A           	txs						;
+000005r 1               
+000005r 1  A2 CD        	ldx  #$CD   ; (2 cycles)
+000007r 1               @delay:
+000007r 1  EA           	nop			; (2 cycles) 1us
+000008r 1  CA           	dex         ; (2 cycles) 1us
+000009r 1  D0 FC        	bne  @delay ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+00000Br 1               
+00000Br 1               
+00000Br 1               	;; Configure uart to 9600 baudrate
+00000Br 1               initUart:
+00000Br 1  A9 80            lda #DLAB
+00000Dr 1  8D 03 C0         sta LCR                 ;set the divisor latch access bit (DLAB)
+000010r 1  A9 0C            lda #DIV_9600_LO
+000012r 1  8D 00 C0         sta DLL                 ;store divisor low byte (4800 baud @ 1 MHz clock)
+000015r 1  A9 00            lda #DIV_9600_HI
+000017r 1  8D 01 C0         sta DLH                 ;store divisor hi byte
+00001Ar 1                                           ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+00001Ar 1  A9 07            lda #FIFO_ENABLE
+00001Cr 1  8D 02 C0         sta FCR                 ;enable the UART FIFO
+00001Fr 1  A9 00            lda #POLLED_MODE
+000021r 1  8D 01 C0         sta IER                 ;disable all interrupts
+000024r 1  A9 03        	lda #LCR_8N1
+000026r 1  8D 03 C0         sta LCR
+000029r 1               
+000029r 1  A2 CD        	ldx  #$CD   ; (2 cycles)
+00002Br 1               @delay:
+00002Br 1  EA           	nop			; (2 cycles) 1us
+00002Cr 1  CA           	dex         ; (2 cycles) 1us
+00002Dr 1  D0 FC        	bne  @delay ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+00002Fr 1               
+00002Fr 1  A2 rr        	ldx #<Title1
+000031r 1  A0 rr        	ldy #>Title1
+000033r 1               
+000033r 1               PrintString:
+000033r 1  A0 00        	ldy #0
+000035r 1               loop:
+000035r 1               
+000035r 1               wait_for_thr_empty:         ;
+000035r 1  AD 05 C0         lda ULSR                ; Get the line status register
+000038r 1  29 60            and #THR_EMPTY          ; Check for TX empty
+00003Ar 1  F0 F9            beq wait_for_thr_empty 	; loop while the THR is not empty
+00003Cr 1  B9 rr rr     	lda Title1,Y
+00003Fr 1  F0 0D        	beq done
+000041r 1  8D 00 C0     	sta THR 				; send the byte
+000044r 1               
+000044r 1  A2 50        	ldx  #$50   ; (2 cycles)
+000046r 1               @delay20:
+000046r 1  EA           	nop			; (2 cycles) 1us
+000047r 1  CA           	dex         ; (2 cycles) 1us
+000048r 1  D0 FC        	bne @delay20 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+00004Ar 1               
+00004Ar 1  C8           	iny
+00004Br 1  4C rr rr     	jmp loop       ; if doesn't branch, string is too long
+00004Er 1               done:
+00004Er 1               
+00004Er 1               
+00004Er 1               NewLoop:
+00004Er 1  A2 50        	ldx  #$50   ; (2 cycles)
+000050r 1               @delay21:
+000050r 1  EA           	nop			; (2 cycles) 1us
+000051r 1  CA           	dex         ; (2 cycles) 1us
+000052r 1  D0 FC        	bne @delay21 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+000054r 1               
+000054r 1               @wait_for_thr_empty:         ;
+000054r 1  AD 05 C0         lda ULSR                ; Get the line status register
+000057r 1  29 60            and #THR_EMPTY          ; Check for TX empty
+000059r 1  F0 F9            beq @wait_for_thr_empty 	; loop while the THR is not empty
+00005Br 1               
+00005Br 1               read_byte:
+00005Br 1  AD 05 C0     	lda ULSR 												    ;// reload the line status register
+00005Er 1  29 01        	and #DATA_READY
+000060r 1  F0 F9        	beq read_byte   											;// if data ready is not set, loop
+000062r 1  AD 00 C0     	lda RBR
+000065r 1               
+000065r 1  8D 00 C0     	sta THR 				; send the byte
+000068r 1               
+000068r 1  A2 50        	ldx  #$50   ; (2 cycles)
+00006Ar 1               @delay22:
+00006Ar 1  EA           	nop			; (2 cycles) 1us
+00006Br 1  CA           	dex         ; (2 cycles) 1us
+00006Cr 1  D0 FC        	bne @delay22 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+00006Er 1               
+00006Er 1  4C rr rr     	jmp NewLoop		;;Infinit loop
+000071r 1               
+000071r 1               Title1:
+000071r 1  0A 0D 36 35  	.byte $0A,$0D,"6502 - SystemTest Copyright (C) 2024",CR,LF
+000075r 1  30 32 20 2D  
+000079r 1  20 53 79 73  
+000099r 1  43 50 55 20  	.byte "CPU HBC-56 - Spartan 56",CR,LF,CR,LF,0,0,0,0
+00009Dr 1  48 42 43 2D  
+0000A1r 1  35 36 20 2D  
+0000B8r 1               
+0000B8r 1               
+0000B8r 1               ;Cpu reset address
+0000B8r 1               .segment    "RESETVEC"
+000000r 1               
+000000r 1  00 00        	.word   $0000
+000002r 1  rr rr        	.word   RESET
+000004r 1  00 00        	.word   $0000
+000004r 1               

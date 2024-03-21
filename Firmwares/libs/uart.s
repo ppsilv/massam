@@ -1,8 +1,10 @@
 
 ;Uart registers
-UART = $C000    ;;Uart address
+;UART = $C000    ;;Uart address
 RBR  = $C000    ;;receiver buffer register (read only)
 THR  = $C000    ;;transmitter holding register (write only)
+DLL  = $C000    ;;divisor latch LSB (if DLAB=1)
+DLM  = $C001    ;;divisor latch MSB (if DLAB=1)
 IER  = $C001    ;;interrupt enable register
 IIR  = $C002    ;;interrupt identification register
 FCR  = $C002    ;;FIFO control register
@@ -10,16 +12,15 @@ LCR  = $C003    ;;line control register
 MCR  = $C004    ;;modem control register
 ULSR = $C005    ;;line status register
 MSR  = $C006    ;;modem status register
-DLL  = $C000    ;;divisor latch LSB (if DLAB=1)
-DLM  = $C001    ;;divisor latch MSB (if DLAB=1)
+SCR	 = $C007	;;scratch register
 
 ;FCR (FIFO Control) constants
 NO_FIFO = %00000000
-FIFO_ENABLE = %00000111
+FIFO_ENABLE = %10000001		;;%00000111
 
-;LCR (Line Control) constants
+;LCR (Line Control) constants	
 LCR_8N1 = %00000011
-DLAB = %10000000
+DLAB    = %10000000
 
 ;LSR (Line Status) constants
 DATA_READY = %00000001
@@ -73,23 +74,40 @@ LF  = $0A ; Line feed
 SP  = $20 ; Space
 ESC = $1B ; Escape
 
-UART_INIT:
-	jsr init_9600
-	rts
-	
+;--------------------------------------------------------------------------------------- 
+;Initialize the UART
+;Uses 8n1 mode with no FIFO and 4800 baud @ 1MHz clock
+;
+init_9600:
+    pha	
+    lda #DLAB
+    sta LCR                 ;set the divisor latch access bit (DLAB)
+    lda #DIV_9600_LO
+    sta DLL                 ;store divisor low byte (4800 baud @ 1 MHz clock)
+    lda #DIV_9600_HI                                       
+    sta DLM                 ;store divisor hi byte
+                            ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+    lda #FIFO_ENABLE
+    sta FCR                 ;enable the UART FIFO
+    lda #POLLED_MODE	
+    sta IER                 ;disable all interrupts
+	lda #LCR_8N1
+    sta LCR    
+    pla
+    rts	
+		
 PrintString:
-		STX T1
-		STY T1+1
-		LDY #0
-@loop:	LDA (T1),Y
-		BEQ done
-		JSR PrintChar
-		INY
-		BNE @loop       ; if doesn't branch, string is too long
-done:	RTS
- 
-ClearScreen:
-	lda #12
+	STX T1
+	STY T1+1
+	LDY #0
+@loop:	
+	LDA (T1),Y
+	BEQ done
+	JSR PrintChar
+	INY
+	BNE @loop       ; if doesn't branch, string is too long
+done:
+	RTS
 	sta Q
 @loop:
  	LDX #<LineClear
@@ -102,30 +120,61 @@ ClearScreen:
 LineClear:
 	.byte "                                                                                ",CR,LF,0
 
-/* --------------------------------------------------------------------------------------- 
-Read a byte from the UART into A. Blocks until a byte is available. 
-If there was an error, set the C flag.
-C flag clear means a byte was successfully read into A.
-*/
-read_byte:
+read_line:
+	ldy	#0
+	lda	#13
+	sta	COUNTER
+@read_line:
+	jsr	read_byte
+	jsr	write_byte
+	sta	(CMD_BUF),y
+	dec	COUNTER
+	beq	fim
+	cmp	#$0D
+	bne	@read_line
+	lda	#$0A
+	sta	(CMD_BUF),y
+	jsr	write_byte
+	inx
+	lda	#$00
+	sta	(CMD_BUF),y
+	jsr	write_byte
+	rts	
+fim:	
+	lda	#$0D
+	sta	(CMD_BUF),y
+	jsr	write_byte
+	inx
+	lda	#$0A
+	sta	(CMD_BUF),y
+	jsr	write_byte
+	inx
+	lda	#$00
+	sta	(CMD_BUF),y
+	jsr	write_byte
+	rts
 
-	lda LSR 												// check the line status register
-	and #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT) // check for errors
-	beq no_err 												// if no error bits, are set, no error
-	lda RBR 												// otherwise, there was an error. Clear the error byte
-	sec 													// set the carry flag to indicate error
+
+;/* --------------------------------------------------------------------------------------- 
+;Read a byte from the UART into A. Blocks until a byte is available. 
+;If there was an error, set the C flag.
+;C flag clear means a byte was successfully read into A.
+;*/
+read_byte:
+	lda ULSR 												;// check the line status register:
+	and #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT) ; check for errors
+	beq no_err 												;// if no error bits, are set, no error
+	lda RBR 												;// otherwise, there was an error. Clear the error byte
+	sec 													;// set the carry flag to indicate error
 	rts
 
 no_err:
-	lda LSR 												// reload the line status register
-
-	and #DATA_READY
-	beq read_byte 											// if data ready is not set, loop
-	
-	lda RBR 												// otherwise, we have data! Load it.
-	clc 													// clear the carry flag to indicate no error
-
-	rts 													// return
+	lda ULSR 												;// reload the line status register
+	and #DATA_READY	
+	beq read_byte 											;// if data ready is not set, loop
+	lda RBR 												;// otherwise, we have data! Load it.
+	clc 													;// clear the carry flag to indicate no error
+	rts 													;// return
 
 	
 ;--------------------------------------------------------------------------------------- 
@@ -140,29 +189,9 @@ wait_for_thr_empty:
 	and #THR_EMPTY
 	beq wait_for_thr_empty 									; loop while the THR is not empty
 	pla
-	sta THR 												; send the byte
+	sta THR 												; send the byte		
 	rts				
 	
-;--------------------------------------------------------------------------------------- 
-;Initialize the UART
-;Uses 8n1 mode with no FIFO and 4800 baud @ 1MHz clock
-;
-init_9600:
-    pha
-    lda #DLAB
-    sta LCR                 ;set the divisor latch access bit (DLAB)
-    lda #DIV_9600_LO
-    sta DLL                 ;store divisor low byte (4800 baud @ 1 MHz clock)
-    lda #DIV_9600_HI                                       
-    sta DLM                 ;store divisor hi byte
-                            ;set 8 data bits, 1 stop bit, no parity, disable DLAB
-    lda #FIFO_ENABLE
-    sta FCR                 ;enable the UART FIFO
-    lda #POLLED_MODE		
-    sta IER                 ;disable all interrupts
-    lda #LCR_8N1
-    sta LCR      
-    pla
-    rts	
+
     
     
