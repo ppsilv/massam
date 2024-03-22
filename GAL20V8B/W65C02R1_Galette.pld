@@ -42,24 +42,24 @@ GAL20V8
 ;L22  =   A15 * /A14 *  A13 * /A12 *  A11      0xA800  ram 2048
 ;L23  =   A15 * /A14 *  A13 *  A12 * /A11      0xB000  ram 2048
 ;L24  =   A15 * /A14 *  A13 *  A12 *  A11      0xB800  ram 2048
-;L25  =   A15 *  A14 * /A13 * /A12 * /A11      0xC000  ram 2048
-;L26  =   A15 *  A14 * /A13 * /A12 *  A11      0xC800  ram 2048
-;L27  =   A15 *  A14 * /A13 *  A12 * /A11      0xD000  ram 2048
-;L28  =   A15 *  A14 * /A13 *  A12 *  A11      0xD800  ram 2048
-;L29  =   A15 *  A14 *  A13 * /A12 * /A11      0xE000  ram 2048
-;L30  =   A15 *  A14 *  A13 * /A12 *  A11      0xE800  ram 2048
-;L31  =   A15 *  A14 *  A13 *  A12 * /A11      0xF000  ram 2048
-;L32  =   A15 *  A14 *  A13 *  A12 *  A11      0xF800  ram 2048
+;L25  =   A15 *  A14 * /A13 * /A12 * /A11      0xC000  IO  2048
+;L26  =   A15 *  A14 * /A13 * /A12 *  A11      0xC800  IO  2048
+;L27  =   A15 *  A14 * /A13 *  A12 * /A11      0xD000  ROM 2048
+;L28  =   A15 *  A14 * /A13 *  A12 *  A11      0xD800  ROM 2048
+;L29  =   A15 *  A14 *  A13 * /A12 * /A11      0xE000  ROM 2048
+;L30  =   A15 *  A14 *  A13 * /A12 *  A11      0xE800  ROM 2048
+;L31  =   A15 *  A14 *  A13 *  A12 * /A11      0xF000  ROM 2048
+;L32  =   A15 *  A14 *  A13 *  A12 *  A11      0xF800  ROM 2048
 
 
 ;Pinouts left side
-A15 A14 A13   A12   A11   A10   A09  A08  RW    PHI2  NC GND
+A15   A14   A13   A12   A11   A10   A09   A08   RW    PHI2  NC   GND
 ;Pinouts right side
-NC  NC  SLOT3 SLOT2 SLOT1 SLOT0 RD   IORQ RAMCS ROMCE NC VCC
+NC    NC    SLOT3 SLOT2 SLOT1 SLOT0 RD    IORQ  RAMCS ROMCE NC   VCC
 
 
 
-/RAMCS = /A15 + /A14;   
+/RAMCS = /A15 + A15 * /A14;
 ;L27, L28, L29, L30, L31 e L32			
 /ROMCE = A15 *  A14 * /A13 *  A12 * /A11 + A15 *  A14 * /A13 *  A12 *  A11 + A15 *  A14 *  A13 * /A12 * /A11 + A15 *  A14 *  A13 * /A12 *  A11 + A15 *  A14 *  A13 *  A12 * /A11 + A15 *  A14 *  A13 *  A12 *  A11	
 ;L25 E L26

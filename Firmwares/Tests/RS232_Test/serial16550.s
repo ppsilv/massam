@@ -65,8 +65,8 @@ read_byte:
 	and #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT)   ; check for errors
 	beq no_err 												    ;// if no error bits, are set, no error
 	lda RBR 												    ;// otherwise, there was an error. Clear the error byte
-	;sec 													    ;// set the carry flag to indicate error
-	rts
+	jmp read_byte													 
+	
 no_err:
 	lda ULSR 												    ;// reload the line status register
 	and #DATA_READY	

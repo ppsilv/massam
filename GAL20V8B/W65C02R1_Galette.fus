@@ -12,7 +12,7 @@ Pin 22 = ROMCE        XOR = 0   AC1 = 0
 
 Pin 21 = RAMCS        XOR = 0   AC1 = 0
   8  ---x ---- ---- ---- ---- ---- ---- ---- ---- ----
-  9  -x-- ---- ---- ---- ---- ---- ---- ---- ---- ----
+  9  -xx- ---- ---- ---- ---- ---- ---- ---- ---- ----
  10  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  11  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  12  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx

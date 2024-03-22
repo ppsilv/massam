@@ -232,127 +232,127 @@ Current file: p8255a.s
 0002C4r 2               read_byte:
 0002C4r 2  AD 05 C0     	lda ULSR 												    ;// check the line status register:
 0002C7r 2  29 1E        	and #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT)   ; check for errors
-0002C9r 2  F0 04        	beq no_err 												    ;// if no error bits, are set, no error
+0002C9r 2  F0 06        	beq no_err 												    ;// if no error bits, are set, no error
 0002CBr 2  AD 00 C0     	lda RBR 												    ;// otherwise, there was an error. Clear the error byte
-0002CEr 2               	;sec 													    ;// set the carry flag to indicate error
-0002CEr 2  60           	rts
-0002CFr 2               no_err:
-0002CFr 2  AD 05 C0     	lda ULSR 												    ;// reload the line status register
-0002D2r 2  29 01        	and #DATA_READY
-0002D4r 2  F0 EE        	beq read_byte   											;// if data ready is not set, loop
-0002D6r 2  AD 00 C0     	lda RBR 		    										;// otherwise, we have data! Load it.
-0002D9r 2               	;clc 				    									;// clear the carry flag to indicate no error
-0002D9r 2  60           	rts
-0002DAr 2               
-0002DAr 2               ; A: Data to write
-0002DAr 2               ;
-0002DAr 2               write_byte:
-0002DAr 2  48               pha                     ;
-0002DBr 2               wait_for_thr_empty:         ;
-0002DBr 2  AD 05 C0         lda ULSR                ; Get the line status register
-0002DEr 2  29 60            and #THR_EMPTY          ; Check for TX empty
-0002E0r 2  F0 F9            beq wait_for_thr_empty 	; loop while the THR is not empty
-0002E2r 2  68           	pla                     ;
-0002E3r 2  8D 00 C0     	sta THR 				; send the byte
-0002E6r 2               
-0002E6r 2  A2 50        	ldx  #$50   ; (2 cycles)
-0002E8r 2               delay22:
-0002E8r 2  EA           	nop			; (2 cycles) 1us
-0002E9r 2  CA           	dex         ; (2 cycles) 1us
-0002EAr 2  D0 FC        	bne  delay22 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
-0002ECr 2  60               rts                     ;
-0002EDr 2               
-0002EDr 2               PrintString:
-0002EDr 2  86 5E        	stx T1
-0002EFr 2  84 5F        	sty T1+1
-0002F1r 2  A0 00        	ldy #0
-0002F3r 2               @loop:
-0002F3r 2  B1 5E        	lda (T1),Y
-0002F5r 2  F0 07        	beq done
-0002F7r 2  20 rr rr     	jsr write_byte
-0002FAr 2  C8           	iny
-0002FBr 2  4C rr rr     	jmp @loop       ; if doesn't branch, string is too long
-0002FEr 2               done:
-0002FEr 2  60           	rts
-0002FFr 2               
-0002FFr 2               read_line:
-0002FFr 2  A2 rr        	ldx #<LINE
-000301r 2  A0 rr        	ldy #>LINE
-000303r 2  20 rr rr     	jsr PrintString
-000306r 2  A0 00        	ldy	#0
-000308r 2  A9 0D        	lda	#13
-00030Ar 2  85 7A        	sta	COUNTER
-00030Cr 2               @read_line:
-00030Cr 2  20 rr rr     	jsr	read_byte
-00030Fr 2  20 rr rr     	jsr	write_byte
-000312r 2  91 60        	sta	(CMD_BUF),y
-000314r 2  C8           	iny
-000315r 2  C6 7A        	dec	COUNTER
-000317r 2  F0 14        	beq	fim
-000319r 2  C9 0D        	cmp	#$0D
-00031Br 2  D0 EF        	bne	@read_line
-00031Dr 2  A9 0A        	lda	#$0A
-00031Fr 2  91 60        	sta	(CMD_BUF),y
-000321r 2  20 rr rr     	jsr	write_byte
-000324r 2  C8           	iny
-000325r 2  A9 00        	lda	#$00
-000327r 2  91 60        	sta	(CMD_BUF),y
-000329r 2  20 rr rr     	jsr	write_byte
-00032Cr 2  60           	rts
-00032Dr 2               fim:
-00032Dr 2  A9 0D        	lda	#$0D
-00032Fr 2  91 60        	sta	(CMD_BUF),y
-000331r 2  20 rr rr     	jsr	write_byte
-000334r 2  C8           	iny
-000335r 2  A9 0A        	lda	#$0A
-000337r 2  91 60        	sta	(CMD_BUF),y
-000339r 2  20 rr rr     	jsr	write_byte
-00033Cr 2  C8           	iny
-00033Dr 2  A9 00        	lda	#$00
-00033Fr 2  91 60        	sta	(CMD_BUF),y
-000341r 2  60           	rts
-000342r 2               LINE:
-000342r 2  44 69 67 69      .byte "Digite uma linha de comando",CR,LF
-000346r 2  74 65 20 75  
-00034Ar 2  6D 61 20 6C  
-00035Fr 2  23 20 00 00      .byte "# ",0,0,0
-000363r 2  00           
-000364r 2               
-000364r 1               .include "../../libs/delay.s"
-000364r 2               ;-----------------------------------------------------------------------------------------
-000364r 2               ; Delay
-000364r 2               ;cpu clock..: 1.843.200 hz
-000364r 2               ;period.....: 0,542 ns
-000364r 2               ;delay total: 1,0 ms
-000364r 2               delay:
-000364r 2               	;PHX
-000364r 2  A2 CD        	ldx  #$CD   ; (2 cycles)
-000366r 2               delay1:
-000366r 2  EA           	nop			; (2 cycles) 1us
-000367r 2  CA           	dex         ; (2 cycles) 1us
-000368r 2  D0 FC        	bne  delay1 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
-00036Ar 2               	;PLX
-00036Ar 2  60           	rts
-00036Br 2               
-00036Br 2               
-00036Br 2               delay2:
-00036Br 2  48           	pha
-00036Cr 2  8A           	txa
+0002CEr 2  4C rr rr     	jmp read_byte
+0002D1r 2               
+0002D1r 2               no_err:
+0002D1r 2  AD 05 C0     	lda ULSR 												    ;// reload the line status register
+0002D4r 2  29 01        	and #DATA_READY
+0002D6r 2  F0 EC        	beq read_byte   											;// if data ready is not set, loop
+0002D8r 2  AD 00 C0     	lda RBR 		    										;// otherwise, we have data! Load it.
+0002DBr 2               	;clc 				    									;// clear the carry flag to indicate no error
+0002DBr 2  60           	rts
+0002DCr 2               
+0002DCr 2               ; A: Data to write
+0002DCr 2               ;
+0002DCr 2               write_byte:
+0002DCr 2  48               pha                     ;
+0002DDr 2               wait_for_thr_empty:         ;
+0002DDr 2  AD 05 C0         lda ULSR                ; Get the line status register
+0002E0r 2  29 60            and #THR_EMPTY          ; Check for TX empty
+0002E2r 2  F0 F9            beq wait_for_thr_empty 	; loop while the THR is not empty
+0002E4r 2  68           	pla                     ;
+0002E5r 2  8D 00 C0     	sta THR 				; send the byte
+0002E8r 2               
+0002E8r 2  A2 50        	ldx  #$50   ; (2 cycles)
+0002EAr 2               delay22:
+0002EAr 2  EA           	nop			; (2 cycles) 1us
+0002EBr 2  CA           	dex         ; (2 cycles) 1us
+0002ECr 2  D0 FC        	bne  delay22 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+0002EEr 2  60               rts                     ;
+0002EFr 2               
+0002EFr 2               PrintString:
+0002EFr 2  86 5E        	stx T1
+0002F1r 2  84 5F        	sty T1+1
+0002F3r 2  A0 00        	ldy #0
+0002F5r 2               @loop:
+0002F5r 2  B1 5E        	lda (T1),Y
+0002F7r 2  F0 07        	beq done
+0002F9r 2  20 rr rr     	jsr write_byte
+0002FCr 2  C8           	iny
+0002FDr 2  4C rr rr     	jmp @loop       ; if doesn't branch, string is too long
+000300r 2               done:
+000300r 2  60           	rts
+000301r 2               
+000301r 2               read_line:
+000301r 2  A2 rr        	ldx #<LINE
+000303r 2  A0 rr        	ldy #>LINE
+000305r 2  20 rr rr     	jsr PrintString
+000308r 2  A0 00        	ldy	#0
+00030Ar 2  A9 0D        	lda	#13
+00030Cr 2  85 7A        	sta	COUNTER
+00030Er 2               @read_line:
+00030Er 2  20 rr rr     	jsr	read_byte
+000311r 2  20 rr rr     	jsr	write_byte
+000314r 2  91 60        	sta	(CMD_BUF),y
+000316r 2  C8           	iny
+000317r 2  C6 7A        	dec	COUNTER
+000319r 2  F0 14        	beq	fim
+00031Br 2  C9 0D        	cmp	#$0D
+00031Dr 2  D0 EF        	bne	@read_line
+00031Fr 2  A9 0A        	lda	#$0A
+000321r 2  91 60        	sta	(CMD_BUF),y
+000323r 2  20 rr rr     	jsr	write_byte
+000326r 2  C8           	iny
+000327r 2  A9 00        	lda	#$00
+000329r 2  91 60        	sta	(CMD_BUF),y
+00032Br 2  20 rr rr     	jsr	write_byte
+00032Er 2  60           	rts
+00032Fr 2               fim:
+00032Fr 2  A9 0D        	lda	#$0D
+000331r 2  91 60        	sta	(CMD_BUF),y
+000333r 2  20 rr rr     	jsr	write_byte
+000336r 2  C8           	iny
+000337r 2  A9 0A        	lda	#$0A
+000339r 2  91 60        	sta	(CMD_BUF),y
+00033Br 2  20 rr rr     	jsr	write_byte
+00033Er 2  C8           	iny
+00033Fr 2  A9 00        	lda	#$00
+000341r 2  91 60        	sta	(CMD_BUF),y
+000343r 2  60           	rts
+000344r 2               LINE:
+000344r 2  44 69 67 69      .byte "Digite uma linha de comando",CR,LF
+000348r 2  74 65 20 75  
+00034Cr 2  6D 61 20 6C  
+000361r 2  23 20 00 00      .byte "# ",0,0,0
+000365r 2  00           
+000366r 2               
+000366r 1               .include "../../libs/delay.s"
+000366r 2               ;-----------------------------------------------------------------------------------------
+000366r 2               ; Delay
+000366r 2               ;cpu clock..: 1.843.200 hz
+000366r 2               ;period.....: 0,542 ns
+000366r 2               ;delay total: 1,0 ms
+000366r 2               delay:
+000366r 2               	;PHX
+000366r 2  A2 CD        	ldx  #$CD   ; (2 cycles)
+000368r 2               delay1:
+000368r 2  EA           	nop			; (2 cycles) 1us
+000369r 2  CA           	dex         ; (2 cycles) 1us
+00036Ar 2  D0 FC        	bne  delay1 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+00036Cr 2               	;PLX
+00036Cr 2  60           	rts
+00036Dr 2               
+00036Dr 2               
+00036Dr 2               delay2:
 00036Dr 2  48           	pha
-00036Er 2  A2 05        	ldx  #$5   ; (2 cycles)
-000370r 2               delay21:
-000370r 2  EA           	nop			; (2 cycles) 1us
-000371r 2  CA           	dex         ; (2 cycles) 1us
-000372r 2  D0 FC        	bne  delay21 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
-000374r 2  68           	pla
-000375r 2  AA           	tax
+00036Er 2  8A           	txa
+00036Fr 2  48           	pha
+000370r 2  A2 05        	ldx  #$5   ; (2 cycles)
+000372r 2               delay21:
+000372r 2  EA           	nop			; (2 cycles) 1us
+000373r 2  CA           	dex         ; (2 cycles) 1us
+000374r 2  D0 FC        	bne  delay21 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
 000376r 2  68           	pla
-000377r 2  60           	rts
-000378r 2               
-000378r 1               ;.include "drv8255a.s"
-000378r 1               
-000378r 1               ;Cpu reset address
-000378r 1               .segment    "RESETVEC"
+000377r 2  AA           	tax
+000378r 2  68           	pla
+000379r 2  60           	rts
+00037Ar 2               
+00037Ar 1               ;.include "drv8255a.s"
+00037Ar 1               
+00037Ar 1               ;Cpu reset address
+00037Ar 1               .segment    "RESETVEC"
 000000r 1               
 000000r 1  00 00        	.word   $0000
 000002r 1  rr rr        	.word   RESET
