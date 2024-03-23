@@ -149,6 +149,7 @@ wait_for_thr_empty:
 	beq wait_for_thr_empty 									; loop while the THR is not empty
 	pla
 	sta THR 												; send the byte
+	jsr	delay
 	rts				
 	
 ;--------------------------------------------------------------------------------------- 

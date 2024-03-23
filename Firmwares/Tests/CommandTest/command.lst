@@ -1,0 +1,359 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : command.s
+Current file: command.s
+
+000000r 1               .setcpu "65C02"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               .include "../../libs/pageZero.s"
+000000r 2               ;Page Zero
+000000r 2               T1		    = $5E
+000000r 2               CMD_BUF		= $60
+000000r 2               Q 		    = $75
+000000r 2               L        	= $77
+000000r 2               MSGL     	= $78
+000000r 2               MSGH     	= $79
+000000r 2               COUNTER  	= $7A
+000000r 2               CRC      	= $7B
+000000r 2               CRCCHECK 	= $7C
+000000r 2               STL      	= $7D
+000000r 2               STH      	= $7E
+000000r 2               DIVISOR_LOW = $7F
+000000r 2               DIVISOR_HIGH = $80
+000000r 2               
+000000r 1               
+000000r 1               RESET:
+000000r 1  78           	sei						; No interrupt
+000001r 1  D8           	cld						; Set decimal
+000002r 1  A2 FF        	ldx #$ff				; Set stack pointer
+000004r 1  9A           	txs						;
+000005r 1  20 rr rr     	jsr	delay				;
+000008r 1  20 rr rr     	jsr initUart			; Configure uart to 9600 baudrate
+00000Br 1               	;jsr init_8255
+00000Br 1  20 rr rr     	jsr	delay
+00000Er 1  A2 rr        	ldx #<Title1
+000010r 1  A0 rr        	ldy #>Title1
+000012r 1  20 rr rr     	jsr PrintString
+000015r 1  A2 rr        	ldx #<Title2
+000017r 1  A0 rr        	ldy #>Title2
+000019r 1  20 rr rr     	jsr PrintString
+00001Cr 1               NewLoop:
+00001Cr 1  A9 0A            lda #$0A
+00001Er 1  20 rr rr     	jsr write_byte
+000021r 1  A9 0D            lda #$0D
+000023r 1  20 rr rr     	jsr write_byte
+000026r 1  A9 3E            lda #'>'
+000028r 1  20 rr rr     	jsr write_byte
+00002Br 1  20 rr rr     	jsr	delay
+00002Er 1               	;READ COMMAND
+00002Er 1  20 rr rr     	jsr	read_byte
+000031r 1  20 rr rr     	jsr	delay
+000034r 1  20 rr rr     	jsr write_byte
+000037r 1  C9 43        	cmp #'C'
+000039r 1  F0 0E        	beq	ClearScreen
+00003Br 1  C9 3F        	cmp	#'?'
+00003Dr 1  F0 10        	beq	ShowCommands
+00003Fr 1  C9 50        	cmp	#'P'
+000041r 1  F0 12        	beq	Poke
+000043r 1  20 rr rr     	jsr	delay
+000046r 1  4C rr rr     	jmp NewLoop
+000049r 1               ClearScreen:
+000049r 1  20 rr rr     	jsr clr
+00004Cr 1  4C rr rr     	jmp NewLoop
+00004Fr 1               ShowCommands:
+00004Fr 1  20 rr rr     	jsr	sc
+000052r 1  4C rr rr     	jmp NewLoop
+000055r 1               Poke:
+000055r 1  20 rr rr     	jsr	pk
+000058r 1  4C rr rr     	jmp NewLoop
+00005Br 1               
+00005Br 1               Title1:
+00005Br 1  0A 0D 36 35  	.byte $0A,$0D,"6502 - SystemTest Copyright (C) 2024",CR,LF
+00005Fr 1  30 32 20 2D  
+000063r 1  20 53 79 73  
+000083r 1  43 50 55 20  	.byte "CPU HBC-56 - Spartan 56",CR,LF,CR,LF,0,0,0,0
+000087r 1  48 42 43 2D  
+00008Br 1  35 36 20 2D  
+0000A2r 1               Title2:
+0000A2r 1  43 50 55 20  	.byte "CPU parameters: ",CR,LF
+0000A6r 1  70 61 72 61  
+0000AAr 1  6D 65 74 65  
+0000B4r 1  43 6C 6F 63  	.byte "Clock......:	1.8Mhz",CR,LF
+0000B8r 1  6B 2E 2E 2E  
+0000BCr 1  2E 2E 2E 3A  
+0000C9r 1  4D 65 6D 6F  	.byte "Memoria RAM:	32k",CR,LF
+0000CDr 1  72 69 61 20  
+0000D1r 1  52 41 4D 3A  
+0000DBr 1  4D 65 6D 6F  	.byte "Memoria ROM:	12k",CR,LF
+0000DFr 1  72 69 61 20  
+0000E3r 1  52 4F 4D 3A  
+0000EDr 1  53 65 72 69  	.byte "Serial.....:	16C550",CR,LF
+0000F1r 1  61 6C 2E 2E  
+0000F5r 1  2E 2E 2E 3A  
+000102r 1  53 65 72 69  	.byte "Serial clk.:	1.8Mhz",CR,LF
+000106r 1  61 6C 20 63  
+00010Ar 1  6C 6B 2E 3A  
+000117r 1  56 69 61 2E  	.byte "Via........:	P8255A",CR,LF
+00011Br 1  2E 2E 2E 2E  
+00011Fr 1  2E 2E 2E 3A  
+00012Cr 1  44 65 63 6F  	.byte "Decod......: GAL20V8B",CR,LF
+000130r 1  64 2E 2E 2E  
+000134r 1  2E 2E 2E 3A  
+000143r 1  42 75 73 2E  	.byte "Bus........: SC112",CR,LF,0,0,0
+000147r 1  2E 2E 2E 2E  
+00014Br 1  2E 2E 2E 3A  
+00015Ar 1               
+00015Ar 1               .include "cmd.s"
+00015Ar 2               
+00015Ar 2               clr:
+00015Ar 2               	;ESC [ 2 J
+00015Ar 2  A9 1B        	lda	#$1b
+00015Cr 2  20 rr rr     	jsr write_byte
+00015Fr 2  A9 5B        	lda	#'['
+000161r 2  20 rr rr     	jsr write_byte
+000164r 2  A9 32        	lda	#'2'
+000166r 2  20 rr rr     	jsr write_byte
+000169r 2  A9 4A        	lda	#'J'
+00016Br 2  20 rr rr     	jsr write_byte
+00016Er 2  60               rts
+00016Fr 2               
+00016Fr 2               sc:
+00016Fr 2  A2 rr        	ldx #<showCmd
+000171r 2  A0 rr        	ldy #>showCmd
+000173r 2  20 rr rr     	jsr PrintString
+000176r 2  60               rts
+000177r 2               showCmd:
+000177r 2  0D 0A 43 6F  	.byte	CR,LF,"Commands Version 0.1.0",CR,LF
+00017Br 2  6D 6D 61 6E  
+00017Fr 2  64 73 20 56  
+000191r 2  3F 2E 2E 2E  	.byte	"?............:Show this help",CR,LF
+000195r 2  2E 2E 2E 2E  
+000199r 2  2E 2E 2E 2E  
+0001AFr 2  43 2E 2E 2E  	.byte	"C............:Clear screen",CR,LF
+0001B3r 2  2E 2E 2E 2E  
+0001B7r 2  2E 2E 2E 2E  
+0001CBr 2  4D 2C 3C 61  	.byte	"M,<addr>.....:Set memory addr",CR,LF
+0001CFr 2  64 64 72 3E  
+0001D3r 2  2E 2E 2E 2E  
+0001EAr 2  53 2C 3C 61  	.byte	"S,<addr>.....:Show memory addr",CR,LF
+0001EEr 2  64 64 72 3E  
+0001F2r 2  2E 2E 2E 2E  
+00020Ar 2  50 2C 3C 61  	.byte	"P,<addr>,data:Poke data int addr memory",CR,LF
+00020Er 2  64 64 72 3E  
+000212r 2  2C 64 61 74  
+000233r 2  52 2C 3C 61  	.byte	"R,<addr>.....:Run program at memory addr",CR,LF,0
+000237r 2  64 64 72 3E  
+00023Br 2  2E 2E 2E 2E  
+00025Er 2               	;;.byte	"All address must be in hexadecimal $0000 to $FFFF",CR,LF
+00025Er 2               pk:
+00025Er 2  20 rr rr     	jsr	read_line
+000261r 2  A0 00        	ldy	#0
+000263r 2               READ_CMD:
+000263r 2  B1 60        	lda (CMD_BUF),y
+000265r 2  C9 0D        	cmp #$0d
+000267r 2  F0 0A        	beq	fim_read_cmd
+000269r 2  20 rr rr     	jsr write_byte
+00026Cr 2  C8           	iny
+00026Dr 2  C0 0D        	cpy #13
+00026Fr 2  D0 F2        	bne READ_CMD
+000271r 2  A9 0D        	lda #$0d
+000273r 2               fim_read_cmd:
+000273r 2  20 rr rr     	jsr write_byte
+000276r 2  60               rts
+000277r 2               
+000277r 1               .include "ser16550.s"
+000277r 2               ;***********************************************************************
+000277r 2               ; SERIAL 16c550 DRIVER
+000277r 2               ;
+000277r 2               
+000277r 2               ;Uart registers
+000277r 2               ;UART_PORT   = $C000            ;;Uart address
+000277r 2               RBR         = $C000    ;;receiver buffer register (read only)
+000277r 2               THR         = $C000    ;;transmitter holding register (write only)
+000277r 2               DLL         = $C000    ;;divisor latch LSB (if DLAB=1)
+000277r 2               DLH         = $C001    ;;divisor latch HSB (if DLAB=1)
+000277r 2               IER         = $C001    ;;interrupt enable register
+000277r 2               IIR         = $C002    ;;interrupt identification register
+000277r 2               FCR         = $C002    ;;FIFO control register
+000277r 2               LCR         = $C003    ;;line control register
+000277r 2               MCR         = $C004    ;;modem control register
+000277r 2               ULSR        = $C005    ;;line status register
+000277r 2               MSR         = $C006    ;;modem status register
+000277r 2               SCR	        = $C007	   ;;scratch register
+000277r 2               
+000277r 2               ; Constants
+000277r 2               CR  = $0D ; Carriage Return
+000277r 2               LF  = $0A ; Line feed
+000277r 2               SP  = $20 ; Space
+000277r 2               ESC = $1B ; Escape
+000277r 2               
+000277r 2               DIV_4800_LO = 24
+000277r 2               DIV_4800_HI = 0
+000277r 2               DIV_9600_LO = 12
+000277r 2               DIV_9600_HI = 0
+000277r 2               DIV_19200_LO = 6
+000277r 2               DIV_19200_HI = 0
+000277r 2               DIV_115200_LO = 1
+000277r 2               DIV_115200_HI = 0
+000277r 2               POLLED_MODE = %00000000
+000277r 2               LCR_8N1 = %00000011
+000277r 2               DLAB    = %10000000
+000277r 2               FIFO_ENABLE = %00000111 ;%00000111
+000277r 2               THR_EMPTY = %01100000       ;;
+000277r 2               
+000277r 2               DATA_READY = %00000001
+000277r 2               OVERRUN_ERR = %00000010
+000277r 2               PARITY_ERR = %00000100
+000277r 2               FRAMING_ERR = %00001000
+000277r 2               BREAK_INT = %00010000
+000277r 2               
+000277r 2               
+000277r 2               initUart:
+000277r 2  48               pha
+000278r 2  A9 80            lda #DLAB
+00027Ar 2  8D 03 C0         sta LCR                 ;set the divisor latch access bit (DLAB)
+00027Dr 2  A9 0C            lda #DIV_9600_LO
+00027Fr 2  8D 00 C0         sta DLL                 ;store divisor low byte (4800 baud @ 1 MHz clock)
+000282r 2  A9 00            lda #DIV_9600_HI
+000284r 2  8D 01 C0         sta DLH                 ;store divisor hi byte
+000287r 2                                           ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+000287r 2  A9 07            lda #FIFO_ENABLE
+000289r 2  8D 02 C0         sta FCR                 ;enable the UART FIFO
+00028Cr 2  A9 00            lda #POLLED_MODE
+00028Er 2  8D 01 C0         sta IER                 ;disable all interrupts
+000291r 2  A9 03        	lda #LCR_8N1
+000293r 2  8D 03 C0         sta LCR
+000296r 2  68               pla
+000297r 2  60               rts
+000298r 2               
+000298r 2               ; A: Data read
+000298r 2               ; Returns:  F = C if character read
+000298r 2               ;           F = NC if no character read
+000298r 2               ;
+000298r 2               read_byte:
+000298r 2  AD 05 C0     	lda ULSR 												    ;// check the line status register:
+00029Br 2  29 1E        	and #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT)   ; check for errors
+00029Dr 2  F0 06        	beq no_err 												    ;// if no error bits, are set, no error
+00029Fr 2  AD 00 C0     	lda RBR 												    ;// otherwise, there was an error. Clear the error byte
+0002A2r 2  4C rr rr     	jmp read_byte
+0002A5r 2               
+0002A5r 2               no_err:
+0002A5r 2  AD 05 C0     	lda ULSR 												    ;// reload the line status register
+0002A8r 2  29 01        	and #DATA_READY
+0002AAr 2  F0 EC        	beq read_byte   											;// if data ready is not set, loop
+0002ACr 2  AD 00 C0     	lda RBR 		    										;// otherwise, we have data! Load it.
+0002AFr 2               	;clc 				    									;// clear the carry flag to indicate no error
+0002AFr 2  60           	rts
+0002B0r 2               
+0002B0r 2               ; A: Data to write
+0002B0r 2               ;
+0002B0r 2               write_byte:
+0002B0r 2  48               pha                     ;
+0002B1r 2               wait_for_thr_empty:         ;
+0002B1r 2  AD 05 C0         lda ULSR                ; Get the line status register
+0002B4r 2  29 60            and #THR_EMPTY          ; Check for TX empty
+0002B6r 2  F0 F9            beq wait_for_thr_empty 	; loop while the THR is not empty
+0002B8r 2  68           	pla                     ;
+0002B9r 2  8D 00 C0     	sta THR 				; send the byte
+0002BCr 2               
+0002BCr 2  A2 80        	ldx  #$80   ; (2 cycles)
+0002BEr 2               delay22:
+0002BEr 2  EA           	nop			; (2 cycles) 1us
+0002BFr 2  CA           	dex         ; (2 cycles) 1us
+0002C0r 2  D0 FC        	bne  delay22 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+0002C2r 2  60               rts                     ;
+0002C3r 2               
+0002C3r 2               PrintString:
+0002C3r 2  86 5E        	stx T1
+0002C5r 2  84 5F        	sty T1+1
+0002C7r 2  A0 00        	ldy #0
+0002C9r 2               @loop:
+0002C9r 2  B1 5E        	lda (T1),Y
+0002CBr 2  F0 07        	beq done
+0002CDr 2  20 rr rr     	jsr write_byte
+0002D0r 2  C8           	iny
+0002D1r 2  4C rr rr     	jmp @loop       ; if doesn't branch, string is too long
+0002D4r 2               done:
+0002D4r 2  60           	rts
+0002D5r 2               
+0002D5r 2               read_line:
+0002D5r 2  A2 rr        	ldx #<LINE
+0002D7r 2  A0 rr        	ldy #>LINE
+0002D9r 2  20 rr rr     	jsr PrintString
+0002DCr 2  A0 00        	ldy	#0
+0002DEr 2  A9 0D        	lda	#13
+0002E0r 2  85 7A        	sta	COUNTER
+0002E2r 2               @read_line:
+0002E2r 2  20 rr rr     	jsr	read_byte
+0002E5r 2  20 rr rr     	jsr	write_byte
+0002E8r 2  91 60        	sta	(CMD_BUF),y
+0002EAr 2  C8           	iny
+0002EBr 2  C6 7A        	dec	COUNTER
+0002EDr 2  F0 14        	beq	fim
+0002EFr 2  C9 0D        	cmp	#$0D
+0002F1r 2  D0 EF        	bne	@read_line
+0002F3r 2  A9 0A        	lda	#$0A
+0002F5r 2  91 60        	sta	(CMD_BUF),y
+0002F7r 2  20 rr rr     	jsr	write_byte
+0002FAr 2  C8           	iny
+0002FBr 2  A9 00        	lda	#$00
+0002FDr 2  91 60        	sta	(CMD_BUF),y
+0002FFr 2  20 rr rr     	jsr	write_byte
+000302r 2  60           	rts
+000303r 2               fim:
+000303r 2  A9 0D        	lda	#$0D
+000305r 2  91 60        	sta	(CMD_BUF),y
+000307r 2  20 rr rr     	jsr	write_byte
+00030Ar 2  C8           	iny
+00030Br 2  A9 0A        	lda	#$0A
+00030Dr 2  91 60        	sta	(CMD_BUF),y
+00030Fr 2  20 rr rr     	jsr	write_byte
+000312r 2  C8           	iny
+000313r 2  A9 00        	lda	#$00
+000315r 2  91 60        	sta	(CMD_BUF),y
+000317r 2  60           	rts
+000318r 2               LINE:
+000318r 2  44 69 67 69      .byte "Digite uma linha de comando",CR,LF
+00031Cr 2  74 65 20 75  
+000320r 2  6D 61 20 6C  
+000335r 2  23 20 00         .byte "# ",0
+000338r 2               
+000338r 1               .include "../../libs/delay.s"
+000338r 2               ;-----------------------------------------------------------------------------------------
+000338r 2               ; Delay
+000338r 2               ;cpu clock..: 1.843.200 hz
+000338r 2               ;period.....: 0,542 ns
+000338r 2               ;delay total: 1,0 ms
+000338r 2               delay:
+000338r 2               	;PHX
+000338r 2  A2 CD        	ldx  #$CD   ; (2 cycles)
+00033Ar 2               delay1:
+00033Ar 2  EA           	nop			; (2 cycles) 1us
+00033Br 2  CA           	dex         ; (2 cycles) 1us
+00033Cr 2  D0 FC        	bne  delay1 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+00033Er 2               	;PLX
+00033Er 2  60           	rts
+00033Fr 2               
+00033Fr 2               
+00033Fr 2               delay2:
+00033Fr 2  48           	pha
+000340r 2  8A           	txa
+000341r 2  48           	pha
+000342r 2  A2 05        	ldx  #$5   ; (2 cycles)
+000344r 2               delay21:
+000344r 2  EA           	nop			; (2 cycles) 1us
+000345r 2  CA           	dex         ; (2 cycles) 1us
+000346r 2  D0 FC        	bne  delay21 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+000348r 2  68           	pla
+000349r 2  AA           	tax
+00034Ar 2  68           	pla
+00034Br 2  60           	rts
+00034Cr 2               
+00034Cr 1               
+00034Cr 1               ;Cpu reset address
+00034Cr 1               .segment    "RESETVEC"
+000000r 1               
+000000r 1  00 00        	.word   $0000
+000002r 1  rr rr        	.word   RESET
+000004r 1  00 00        	.word   $0000
+000004r 1               

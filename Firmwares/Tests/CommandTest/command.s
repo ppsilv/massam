@@ -62,10 +62,9 @@ Title2:
 	.byte "Decod......: GAL20V8B",CR,LF
 	.byte "Bus........: SC112",CR,LF,0,0,0
 
-.include "command.s"
-.include "serial16550.s"
-.include "../../libs/delay.s"
-;.include "drv8255a.s"
+.include "cmd.s"
+.include "ser16550.s"
+.include "delay.s"
 
 ;Cpu reset address
 .segment    "RESETVEC"

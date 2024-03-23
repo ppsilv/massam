@@ -43,7 +43,6 @@ PARITY_ERR = %00000100
 FRAMING_ERR = %00001000
 BREAK_INT = %00010000
 
-
 initUart:
     pha	
     lda #DLAB

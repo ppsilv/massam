@@ -1,0 +1,46 @@
+Modules list:
+-------------
+hmc56.o:
+    CODE              Offs=000000  Size=001C96  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=000078  Align=00001  Fill=0000
+    VECTORS           Offs=000000  Size=000084  Align=00001  Fill=0000
+    KEYWORDS          Offs=000000  Size=0000E1  Align=00001  Fill=0000
+    DUMMY             Offs=000000  Size=000045  Align=00001  Fill=0000
+    ERROR             Offs=000000  Size=0000F0  Align=00001  Fill=0000
+    CHRGET            Offs=000000  Size=00001D  Align=00001  Fill=0000
+    INIT              Offs=000000  Size=00019D  Align=00001  Fill=0000
+    BIOS              Offs=000000  Size=0000CA  Align=00001  Fill=0000
+    WOZMON            Offs=000000  Size=0000EF  Align=00001  Fill=0000
+    RESETVECTOR       Offs=000000  Size=000006  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+DUMMY                 000000  000044  000045  00001
+ZEROPAGE              000000  000077  000078  00001
+VECTORS               00D000  00D083  000084  00001
+KEYWORDS              00D084  00D164  0000E1  00001
+ERROR                 00D165  00D254  0000F0  00001
+CODE                  00D255  00EEEA  001C96  00001
+CHRGET                00EEEB  00EF07  00001D  00001
+INIT                  00EF08  00F0A4  00019D  00001
+BIOS                  00F0A5  00F16E  0000CA  00001
+WOZMON                00FF00  00FFEE  0000EF  00001
+RESETVECTOR           00FFFA  00FFFF  000006  00001
+
+
+Exports list by name:
+---------------------
+
+
+
+Exports list by value:
+----------------------
+
+
+
+Imports list:
+-------------
+

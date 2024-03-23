@@ -24,8 +24,8 @@ al 00FF10 .ESCAPE
 al 00FF21 .BACKSPACE
 al 00FF05 .NOTCR
 al 00FF00 .RESET
-al 00F167 .delay1
-al 00F165 .delay
+al 00F16A .delay1
+al 00F168 .delay
 al 00F138 .wait_for_thr_empty
 al 00F137 .write_byte
 al 00F12B .no_err
@@ -36,7 +36,7 @@ al 00F0BC .ClearScreen
 al 00F0BB .done
 al 00F0B1 .@loop
 al 00F0AB .PrintString
-al 00F144 .init_9600
+al 00F147 .init_9600
 al 00F0A7 .UART_INIT
 al 00F081 .QT_BASIC
 al 00F072 .QT_BYTES_FREE

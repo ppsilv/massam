@@ -9468,51 +9468,52 @@ Current file: msbasic.s
 000098r 4  F0 F9        	beq wait_for_thr_empty 									; loop while the THR is not empty
 00009Ar 4  68           	pla
 00009Br 4  8D 00 C0     	sta THR 												; send the byte
-00009Er 4  60           	rts
-00009Fr 4               
-00009Fr 4               ;---------------------------------------------------------------------------------------
-00009Fr 4               ;Initialize the UART
-00009Fr 4               ;Uses 8n1 mode with no FIFO and 4800 baud @ 1MHz clock
-00009Fr 4               ;
-00009Fr 4               init_9600:
-00009Fr 4  48               pha
-0000A0r 4  A9 80            lda #DLAB
-0000A2r 4  8D 03 C0         sta LCR                 ;set the divisor latch access bit (DLAB)
-0000A5r 4  A9 0C            lda #DIV_9600_LO
-0000A7r 4  8D 00 C0         sta DLL                 ;store divisor low byte (4800 baud @ 1 MHz clock)
-0000AAr 4  A9 00            lda #DIV_9600_HI
-0000ACr 4  8D 01 C0         sta DLM                 ;store divisor hi byte
-0000AFr 4                                           ;set 8 data bits, 1 stop bit, no parity, disable DLAB
-0000AFr 4  A9 07            lda #FIFO_ENABLE
-0000B1r 4  8D 02 C0         sta FCR                 ;enable the UART FIFO
-0000B4r 4  A9 00            lda #POLLED_MODE
-0000B6r 4  8D 01 C0         sta IER                 ;disable all interrupts
-0000B9r 4  A9 03            lda #LCR_8N1
-0000BBr 4  8D 03 C0         sta LCR
-0000BEr 4  68               pla
-0000BFr 4  60               rts
-0000C0r 4               
-0000C0r 4               
-0000C0r 4               
-0000C0r 3               .include "delay.s"
-0000C0r 4               ;-----------------------------------------------------------------------------------------
-0000C0r 4               ; Delay
-0000C0r 4               ;cpu clock..: 1.843.200 hz
-0000C0r 4               ;period.....: 0,542 ns
-0000C0r 4               ;deley total: 1,0 ms
-0000C0r 4               delay:
-0000C0r 4  A2 CD        	ldx  #$CD   ; (2 cycles)
-0000C2r 4               delay1:
-0000C2r 4  EA           	nop			; (2 cycles) 1us
-0000C3r 4  CA           	dex         ; (2 cycles) 1us
-0000C4r 4  D0 FC        	bne  delay1 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
-0000C6r 4  60           	rts
-0000C7r 4               
-0000C7r 3               .include "wozmon.s"
-0000C7r 4               ;  The WOZ Monitor for the Apple 1
-0000C7r 4               ;  Written by Steve Wozniak in 1976
-0000C7r 4               .setcpu "6502"
-0000C7r 4               .segment "WOZMON"
+00009Er 4  20 rr rr     	jsr	delay
+0000A1r 4  60           	rts
+0000A2r 4               
+0000A2r 4               ;---------------------------------------------------------------------------------------
+0000A2r 4               ;Initialize the UART
+0000A2r 4               ;Uses 8n1 mode with no FIFO and 4800 baud @ 1MHz clock
+0000A2r 4               ;
+0000A2r 4               init_9600:
+0000A2r 4  48               pha
+0000A3r 4  A9 80            lda #DLAB
+0000A5r 4  8D 03 C0         sta LCR                 ;set the divisor latch access bit (DLAB)
+0000A8r 4  A9 0C            lda #DIV_9600_LO
+0000AAr 4  8D 00 C0         sta DLL                 ;store divisor low byte (4800 baud @ 1 MHz clock)
+0000ADr 4  A9 00            lda #DIV_9600_HI
+0000AFr 4  8D 01 C0         sta DLM                 ;store divisor hi byte
+0000B2r 4                                           ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+0000B2r 4  A9 07            lda #FIFO_ENABLE
+0000B4r 4  8D 02 C0         sta FCR                 ;enable the UART FIFO
+0000B7r 4  A9 00            lda #POLLED_MODE
+0000B9r 4  8D 01 C0         sta IER                 ;disable all interrupts
+0000BCr 4  A9 03            lda #LCR_8N1
+0000BEr 4  8D 03 C0         sta LCR
+0000C1r 4  68               pla
+0000C2r 4  60               rts
+0000C3r 4               
+0000C3r 4               
+0000C3r 4               
+0000C3r 3               .include "delay.s"
+0000C3r 4               ;-----------------------------------------------------------------------------------------
+0000C3r 4               ; Delay
+0000C3r 4               ;cpu clock..: 1.843.200 hz
+0000C3r 4               ;period.....: 0,542 ns
+0000C3r 4               ;deley total: 1,0 ms
+0000C3r 4               delay:
+0000C3r 4  A2 CD        	ldx  #$CD   ; (2 cycles)
+0000C5r 4               delay1:
+0000C5r 4  EA           	nop			; (2 cycles) 1us
+0000C6r 4  CA           	dex         ; (2 cycles) 1us
+0000C7r 4  D0 FC        	bne  delay1 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+0000C9r 4  60           	rts
+0000CAr 4               
+0000CAr 3               .include "wozmon.s"
+0000CAr 4               ;  The WOZ Monitor for the Apple 1
+0000CAr 4               ;  Written by Steve Wozniak in 1976
+0000CAr 4               .setcpu "6502"
+0000CAr 4               .segment "WOZMON"
 000000r 4               
 000000r 4               .setcpu "65C02"
 000000r 4               .segment "WOZMON"

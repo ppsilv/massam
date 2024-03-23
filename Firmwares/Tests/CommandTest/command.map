@@ -1,7 +1,7 @@
 Modules list:
 -------------
-p8255a.o:
-    CODE              Offs=000000  Size=00035E  Align=00001  Fill=0000
+command.o:
+    CODE              Offs=000000  Size=00034C  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=000000  Align=00001  Fill=0000
     BSS               Offs=000000  Size=000000  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000000  Align=00001  Fill=0000
@@ -19,7 +19,7 @@ DATA                  000000  000000  000000  00001
 NULL                  000000  000000  000000  00001
 RODATA                000000  000000  000000  00001
 ZEROPAGE              000000  000000  000000  00001
-CODE                  00D000  00D35D  00035E  00001
+CODE                  00D000  00D34B  00034C  00001
 RESETVEC              00FFFA  00FFFF  000006  00001
 
 
