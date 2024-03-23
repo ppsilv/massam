@@ -85,30 +85,30 @@ UART_INIT:
 	jsr init_9600
 	rts
 	
-PrintString:
-		STX T1
-		STY T1+1
-		LDY #0
-@loop:	LDA (T1),Y
-		BEQ done
-		JSR CHROUT
-		INY
-		BNE @loop       ; if doesn't branch, string is too long
-done:	RTS
- 
-ClearScreen:
-	lda #12
-	sta Q
-@loop:
- 	LDX #<LineClear
-	LDY #>LineClear
-	jsr PrintString
-	dec Q
-	bne @loop
-	rts
+;PrintString:
+;		STX T1
+;		STY T1+1
+;		LDY #0
+;@loop:	LDA (T1),Y
+;		BEQ done
+;		JSR CHROUT
+;		INY
+;		BNE @loop       ; if doesn't branch, string is too long
+;done:	RTS
+;
+;ClearScreen:
+;	lda #12
+;	sta Q
+;@loop:
+; ;	LDX #<LineClear
+;	LDY #>LineClear
+;	jsr PrintString
+;	dec Q
+;	bne @loop
+;	rts
 	
-LineClear:
-	.byte "                                                                                ",CR,LF,0
+;LineClear:
+;	.byte "                                                                                ",CR,LF,0
 
 ;/* --------------------------------------------------------------------------------------- 
 ;Read a byte from the UART into A. Blocks until a byte is available. 

@@ -1,0 +1,118 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : ser16550.s
+Current file: ser16550.s
+
+000000r 1               ;***********************************************************************
+000000r 1               ; SERIAL 16c550 DRIVER
+000000r 1               ;
+000000r 1               .setcpu "65C02"
+000000r 1               .segment "BIOS"
+000000r 1               
+000000r 1               ;Uart registers
+000000r 1               ;UART_PORT   = $C000            ;;Uart address
+000000r 1               RBR  = $C000    ;;receiver buffer register (read only)
+000000r 1               THR  = $C000    ;;transmitter holding register (write only)
+000000r 1               DLL  = $C000    ;;divisor latch LSB (if DLAB=1)
+000000r 1               DLH  = $C001    ;;divisor latch HSB (if DLAB=1)
+000000r 1               IER  = $C001    ;;interrupt enable register
+000000r 1               IIR  = $C002    ;;interrupt identification register
+000000r 1               FCR  = $C002    ;;FIFO control register
+000000r 1               LCR  = $C003    ;;line control register
+000000r 1               MCR  = $C004    ;;modem control register
+000000r 1               ULSR = $C005    ;;line status register
+000000r 1               MSR  = $C006    ;;modem status register
+000000r 1               SCR	 = $C007	   ;;scratch register
+000000r 1               
+000000r 1               ; Constants
+000000r 1               .if .not .def(CR)
+000000r 1               	CR  = $0D ; Carriage Return
+000000r 1               .endif
+000000r 1               .if .not .def(CR)
+000000r 1               	LF  = $0A ; Line feed
+000000r 1               .endif
+000000r 1               .if .not .def(Q)
+000000r 1               	Q 		= $75
+000000r 1               .endif
+000000r 1               .if .not .def(T1)
+000000r 1               	T1		= $76
+000000r 1               .endif
+000000r 1               
+000000r 1               DIV_4800_LO   = 24
+000000r 1               DIV_4800_HI   = 0
+000000r 1               DIV_9600_LO   = 12
+000000r 1               DIV_9600_HI   = 0
+000000r 1               DIV_19200_LO  = 6
+000000r 1               DIV_19200_HI  = 0
+000000r 1               DIV_115200_LO = 1
+000000r 1               DIV_115200_HI = 0
+000000r 1               POLLED_MODE   = %00000000
+000000r 1               LCR_8N1       = %00000011
+000000r 1               DLAB          = %10000000
+000000r 1               FIFO_ENABLE   = %00000111 ;%00000111
+000000r 1               THR_EMPTY     = %01100000       ;;
+000000r 1               
+000000r 1               DATA_READY  = %00000001
+000000r 1               OVERRUN_ERR = %00000010
+000000r 1               PARITY_ERR  = %00000100
+000000r 1               FRAMING_ERR = %00001000
+000000r 1               BREAK_INT   = %00010000
+000000r 1               
+000000r 1               INITUART:
+000000r 1  48               PHA
+000001r 1  A9 80            LDA        #DLAB               ;set the divisor latch access bit (DLAB)
+000003r 1  8D 03 C0         STA        LCR
+000006r 1  A9 0C            LDA        #DIV_9600_LO        ;store divisor low byte (9600 baud @ 1,8 MHz clock)
+000008r 1  8D 00 C0         STA        DLL
+00000Br 1  A9 00            LDA        #DIV_9600_HI        ;store divisor hi byte
+00000Dr 1  8D 01 C0         STA        DLH
+000010r 1  A9 07            LDA        #FIFO_ENABLE        ;enable the UART FIFO
+000012r 1  8D 02 C0         STA        FCR
+000015r 1  A9 00            LDA        #POLLED_MODE	       ;disable all interrupts
+000017r 1  8D 01 C0         STA        IER
+00001Ar 1  A9 03        	LDA        #LCR_8N1            ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+00001Cr 1  8D 03 C0         STA        LCR
+00001Fr 1  68               PLA
+000020r 1  60               RTS
+000021r 1               
+000021r 1               ; A: Data read
+000021r 1               ; Returns:  F = C if character read
+000021r 1               ;           F = NC if no character read
+000021r 1               ;
+000021r 1               CHRIN:
+000021r 1               READ_BYTE:
+000021r 1  AD 05 C0     	LDA ULSR 												    ;// check the line status register:
+000024r 1  29 1E        	AND #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT)   ; check for errors
+000026r 1  F0 06        	BEQ NO_ERR 												    ;// if no error bits, are set, no error
+000028r 1  AD 00 C0     	LDA RBR 												    ;// otherwise, there was an error. Clear the error byte
+00002Br 1  4C rr rr     	JMP READ_BYTE
+00002Er 1               NO_ERR:
+00002Er 1  AD 05 C0     	LDA ULSR 												    ;// reload the line status register
+000031r 1  29 01        	AND #DATA_READY
+000033r 1  F0 EC        	BEQ READ_BYTE   											;// if data ready is not set, loop
+000035r 1  AD 00 C0     	LDA RBR 		    										;// otherwise, we have data! Load it. 				    									;// clear the carry flag to indicate no error
+000038r 1  60           	RTS
+000039r 1               
+000039r 1               ; A: Data to write
+000039r 1               ;
+000039r 1               WRITE_0A:
+000039r 1  A9 0A        	LDA	#$0A
+00003Br 1               CHROUT:
+00003Br 1               WRITE_BYTE:
+00003Br 1  48               PHA                     ;
+00003Cr 1               WAIT_FOR_THR_EMPTY:
+00003Cr 1  AD 05 C0         LDA ULSR                ; Get the line status register
+00003Fr 1  29 60            AND #THR_EMPTY          ; Check for TX empty
+000041r 1  F0 F9            BEQ WAIT_FOR_THR_EMPTY 	; loop while the THR is not empty
+000043r 1  68           	PLA                     ;
+000044r 1  8D 00 C0     	STA THR 				; send the byte
+000047r 1               
+000047r 1  C9 0D        	CMP	#$0D
+000049r 1  F0 EE        	BEQ	WRITE_0A
+00004Br 1               
+00004Br 1  A2 80        	LDX  #$80   ; (2 cycles)
+00004Dr 1               DELAY22:
+00004Dr 1  EA           	NOP			; (2 cycles) 1us
+00004Er 1  CA           	DEX         ; (2 cycles) 1us
+00004Fr 1  D0 FC        	BNE  DELAY22 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+000051r 1  60               RTS                     ;
+000051r 1               
