@@ -111,3 +111,8 @@ DELAY22:
 	DEX         ; (2 cycles) 1us
 	BNE  DELAY22 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
     RTS                     ;
+
+SAVE:
+	RTS
+LOAD:
+	RTS	

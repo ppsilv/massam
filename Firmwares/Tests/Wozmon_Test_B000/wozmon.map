@@ -1,0 +1,49 @@
+Modules list:
+-------------
+wozmon.o:
+    CODE              Offs=000000  Size=000000  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=000000  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=000000  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=000000  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=000000  Align=00001  Fill=0000
+    NULL              Offs=000000  Size=000000  Align=00001  Fill=0000
+    WOZMON            Offs=000000  Size=0000F1  Align=00001  Fill=0000
+    RESETVEC          Offs=000000  Size=000006  Align=00001  Fill=0000
+bios.o:
+    CODE              Offs=000000  Size=000000  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=000000  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=000000  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=000000  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=000000  Align=00001  Fill=0000
+    NULL              Offs=000000  Size=000000  Align=00001  Fill=0000
+    BIOS              Offs=000000  Size=000054  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+BSS                   000000  000000  000000  00001
+CODE                  000000  000000  000000  00001
+DATA                  000000  000000  000000  00001
+NULL                  000000  000000  000000  00001
+RODATA                000000  000000  000000  00001
+ZEROPAGE              000000  000000  000000  00001
+BIOS                  00DFFA  00E04D  000054  00001
+WOZMON                00FF00  00FFF0  0000F1  00001
+RESETVEC              00FFFA  00FFFF  000006  00001
+
+
+Exports list by name:
+---------------------
+
+
+
+Exports list by value:
+----------------------
+
+
+
+Imports list:
+-------------
+

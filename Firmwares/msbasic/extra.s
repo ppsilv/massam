@@ -28,6 +28,6 @@
         .byte   0,0,0
 .endif
 
-.ifdef hmc56
+.ifdef PDSILVA
 .include "bios.s"
 .endif

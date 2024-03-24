@@ -25,9 +25,9 @@ AIM65 := 1
 .elseif .def(sym1)
 SYM1 := 1
 .include "defines_sym1.s"
-.elseif .def(hmc56)
-HMC56 := 1
-.include "defines_hmc-56.s"
+.elseif .def(pdsilva)
+PDSILVA := 1
+.include "defines_pdsilva.s"
 .endif
 
 .ifdef CONFIG_2C

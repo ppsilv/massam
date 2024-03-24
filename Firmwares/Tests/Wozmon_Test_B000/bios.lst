@@ -1,6 +1,6 @@
 ca65 V2.18 - Ubuntu 2.19-1
-Main file   : ser16550.s
-Current file: ser16550.s
+Main file   : bios.s
+Current file: bios.s
 
 000000r 1               ;***********************************************************************
 000000r 1               ; SERIAL 16c550 DRIVER
@@ -115,4 +115,9 @@ Current file: ser16550.s
 00004Er 1  CA           	DEX         ; (2 cycles) 1us
 00004Fr 1  D0 FC        	BNE  DELAY22 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
 000051r 1  60               RTS                     ;
-000051r 1               
+000052r 1               
+000052r 1               SAVE:
+000052r 1  60           	RTS
+000053r 1               LOAD:
+000053r 1  60           	RTS
+000053r 1               

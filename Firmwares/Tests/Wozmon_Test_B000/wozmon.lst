@@ -203,8 +203,6 @@ Current file: wozmon.s
 0000EFr 1  68                           PLA                    ; Restore A.
 0000F0r 1  60                           RTS                    ; Return.
 0000F1r 1               
-0000F1r 1               ;.include "ser16550.s"
-0000F1r 1               
 0000F1r 1                 ;.org $FFFA
 0000F1r 1               .segment "RESETVEC"
 000000r 1               
@@ -212,11 +210,3 @@ Current file: wozmon.s
 000002r 1  rr rr                        .word   RESET          ; RESET vector
 000004r 1  00 00                        .word   $0000          ; IRQ vector
 000004r 1               
-A15 *  A14 * /A13 * /A12 * /A11  +
-A15 *  A14 * /A13 * /A12 *  A11  +
-A15 *  A14 * /A13 *  A12 * /A11  +
-A15 *  A14 * /A13 *  A12 *  A11  +
-A15 *  A14 *  A13 * /A12 * /A11  +
-A15 *  A14 *  A13 * /A12 *  A11  +
-A15 *  A14 *  A13 *  A12 * /A11  +
-A15 *  A14 *  A13 *  A12 *  A11  ;

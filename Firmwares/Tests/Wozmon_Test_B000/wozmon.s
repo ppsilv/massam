@@ -1,6 +1,8 @@
 .setcpu "65C02"
+.segment "WOZMON"
 
-.zeropage
+  ;.org $8000
+  ;.org $FEE5
 
 XAML  = $24                            ; Last "opened" location Low
 XAMH  = $25                            ; Last "opened" location High
@@ -11,12 +13,14 @@ H     = $29                            ; Hex value parsing High
 YSAV  = $2A                            ; Used to see if hex value is given
 MODE  = $2B                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 
-IN          = $0100                          ; Input buffer
+INITUART   = $DFFA
+WRITE_BYTE = $E035
+READ_BYTE  = $E01B
 
-.segment "WOZMON"
 
+IN          = $0200                          ; Input buffer
 
-RESET:        
+RESET:
 	              SEI						; No interrupt
 	              CLD						; Set decimal
 	              LDX #$ff				; Set stack pointer
@@ -80,7 +84,7 @@ NEXTITEM:
                 CMP     #$3A           ; ":"?
                 BEQ     SETSTOR        ; Yes, set STOR mode.
                 CMP     #$52           ; "R"?
-                BEQ     RUNPROD            ; Yes, run user program.
+                BEQ     RUN            ; Yes, run user program.
                 STX     L              ; $00 -> L.
                 STX     H              ;    and H.
                 STY     YSAV           ; Save Y for comparison
@@ -123,7 +127,7 @@ NOTHEX:
                 INC     STH            ; Add carry to 'store index' high order.
 TONEXTITEM:     JMP     NEXTITEM       ; Get next command item.
 
-RUNPROD:
+RUN:
                 JMP     (XAML)         ; Run at current XAM index.
 
 NOTSTOR:
@@ -195,8 +199,9 @@ TXDELAY:        DEC                    ; Decrement A.
                 PLA                    ; Restore A.
                 RTS                    ; Return.
 
- ;.segment "RESETVEC"
-;
- ;               .word   $0F00          ; NMI vector
- ;               .word   RESET          ; RESET vector
- ;               .word   $0000          ; IRQ vector
+  ;.org $FFFA
+.segment "RESETVEC"
+
+                .word   $0F00          ; NMI vector
+                .word   RESET          ; RESET vector
+                .word   $0000          ; IRQ vector

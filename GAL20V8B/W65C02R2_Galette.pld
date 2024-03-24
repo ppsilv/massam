@@ -12,12 +12,13 @@ GAL20V8
 ;//Device    G20V8AS; */
 
 ;TOTAL 
-;SRAM = 49151 bytes	0X0000 <-> 0xBFFF 49151 Bytes
-;ROM  = 12288 bytes     0xD000 <-> 0xFFFF 12288 Bytes
-;IO   =  4096 bytes	0xC000 <-> 0xCFFF  4096 Bytes
+;SRAM = 30720 bytes	0X0000 <-> 0x7800
+;ROM  = 31768 bytes 0x8000 <-> 0xFFFF
+;IO   =  2048 bytes	0x7800 <-> 0x7FFF
 
 
 ;Divisions in 2048 bytes
+;RAMCS
 ;L01  =  /A15 * /A14 * /A13 * /A12 * /A11      0x0000  ram 2048        
 ;L02  =  /A15 * /A14 * /A13 * /A12 *  A11      0x0800  ram 2048
 ;L03  =  /A15 * /A14 * /A13 *  A12 * /A11      0x1000  ram 2048
@@ -26,22 +27,29 @@ GAL20V8
 ;L06  =  /A15 * /A14 *  A13 * /A12 *  A11      0x2800  ram 2048
 ;L07  =  /A15 * /A14 *  A13 *  A12 * /A11      0x3000  ram 2048
 ;L08  =  /A15 * /A14 *  A13 *  A12 *  A11      0x3800  ram 2048
+;RAMCS
 ;L09  =  /A15 *  A14 * /A13 * /A12 * /A11      0x4000  ram 2048
 ;L10  =  /A15 *  A14 * /A13 * /A12 *  A11      0x4800  ram 2048
 ;L11  =  /A15 *  A14 * /A13 *  A12 * /A11      0x5000  ram 2048
 ;L12  =  /A15 *  A14 * /A13 *  A12 *  A11      0x5800  ram 2048
+;RAMCS
 ;L13  =  /A15 *  A14 *  A13 * /A12 * /A11      0x6000  ram 2048
 ;L14  =  /A15 *  A14 *  A13 * /A12 *  A11      0x6800  ram 2048
+;RAMCS
 ;L15  =  /A15 *  A14 *  A13 *  A12 * /A11      0x7000  ram 2048
+;IOREQ
 ;L16  =  /A15 *  A14 *  A13 *  A12 *  A11      0x7800  ram 2048
+;ROMCE
 ;L17  =   A15 * /A14 * /A13 * /A12 * /A11      0x8000  ram 2048
 ;L18  =   A15 * /A14 * /A13 * /A12 *  A11      0x8800  ram 2048
 ;L19  =   A15 * /A14 * /A13 *  A12 * /A11      0x9000  ram 2048
 ;L20  =   A15 * /A14 * /A13 *  A12 *  A11      0x9800  ram 2048
 ;L21  =   A15 * /A14 *  A13 * /A12 * /A11      0xA000  ram 2048
 ;L22  =   A15 * /A14 *  A13 * /A12 *  A11      0xA800  ram 2048
+;IOREQ
 ;L23  =   A15 * /A14 *  A13 *  A12 * /A11      0xB000  ram 2048
 ;L24  =   A15 * /A14 *  A13 *  A12 *  A11      0xB800  ram 2048
+
 ;L25  =   A15 *  A14 * /A13 * /A12 * /A11      0xC000  IO  2048
 ;L26  =   A15 *  A14 * /A13 * /A12 *  A11      0xC800  IO  2048
 ;L27  =   A15 *  A14 * /A13 *  A12 * /A11      0xD000  ROM 2048
@@ -59,11 +67,17 @@ NC    NC    SLOT3 SLOT2 SLOT1 SLOT0 RD    IORQ  RAMCS ROMCE NC   VCC
 
 
 
-/RAMCS = /A15 + A15 * /A14;
-;L27, L28, L29, L30, L31 e L32
-/ROMCE = A15 *  A14 * /A13 *  A12 * /A11 + A15 *  A14 * /A13 *  A12 *  A11 + A15 *  A14 *  A13 * /A12 * /A11 + A15 *  A14 *  A13 * /A12 *  A11 + A15 *  A14 *  A13 *  A12 * /A11 + A15 *  A14 *  A13 *  A12 *  A11	
-;L25 E L26
-/IORQ  = A15 *  A14 * /A13 * /A12 * /A11 + A15 *  A14 * /A13 * /A12 *  A11;			
+
+/IORQ  = A15 * /A14 *  A13 *  A12 * /A11 + A15 * /A14 *  A13 *  A12 *  A11;
 /RD    = PHI2 * RW;
+/RAMCS = /A15;
+/ROMCE = A15 *  A14 * /A13 * /A12 * /A11  +
+A15 *  A14 * /A13 * /A12 *  A11  +
+A15 *  A14 * /A13 *  A12 * /A11  +
+A15 *  A14 * /A13 *  A12 *  A11  +
+A15 *  A14 *  A13 * /A12 * /A11  +
+A15 *  A14 *  A13 * /A12 *  A11  +
+A15 *  A14 *  A13 *  A12 * /A11  +
+A15 *  A14 *  A13 *  A12 *  A11  ;
 
 
