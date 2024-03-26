@@ -11,7 +11,7 @@ H     = $29                            ; Hex value parsing High
 YSAV  = $2A                            ; Used to see if hex value is given
 MODE  = $2B                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 
-IN          = $0100                          ; Input buffer
+IN          = $0200                          ; Input buffer
 
 .segment "WOZMON"
 
@@ -47,16 +47,12 @@ GETLINE:
 BACKSPACE:      DEY                    ; Back up text index.
                 BMI     GETLINE        ; Beyond start of line, reinitialize.
 
-NEXTCHAR:       ;Get next character
-                ;LDA     ACIA_STATUS    ; Check status.
-                ;AND     #DATA_READY    ; Key ready?
-                ;BEQ     NEXTCHAR       ; Loop until ready.
-                ;LDA     ACIA_DATA      ; Load character. B7 will be '0'.
+NEXTCHAR:       
 
                 JSR     READ_BYTE
 
                 STA     IN,Y           ; Add to text buffer.
-                JSR     ECHO           ; Display character.
+                ;JSR     ECHO           ; Display character.
                 CMP     #$0D           ; CR?
                 BNE     NOTCR          ; No.
 
@@ -185,10 +181,8 @@ PRHEX:
                 ADC     #$06           ; Add offset for letter.
 
 ECHO:
-                PHA                    ; Save A.
-                
+                PHA                    ; Save A.           
                 JSR     WRITE_BYTE
-
                 LDA     #$FF           ; Initialize delay loop.
 TXDELAY:        DEC                    ; Decrement A.
                 BNE     TXDELAY        ; Until A gets to 0.

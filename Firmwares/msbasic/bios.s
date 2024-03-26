@@ -87,7 +87,31 @@ NO_ERR:
 	AND #DATA_READY	
 	BEQ READ_BYTE   											;// if data ready is not set, loop
 	LDA RBR 
-    ;JSR WRITE_BYTE ; ECHO
+    PHA                     ;
+WAIT_FOR_THR:	
+    LDA ULSR                ; Get the line status register
+    AND #THR_EMPTY          ; Check for TX empty
+    BEQ WAIT_FOR_THR 	; loop while the THR is not empty
+	PLA                     ;	
+	STA THR 				; send the byte	
+
+    PHA                     ;
+    lda     #$FF
+@txdelay:
+    nop
+    dec
+    bne     @txdelay
+
+    lda     #$FF
+@txdelay1:
+    nop
+    dec
+    bne     @txdelay1
+
+
+	PLA                     ;	
+
+    ;JMP WRITE_BYTE ; ECHO
 	SEC		    										;// otherwise, we have data! Load it. 				    									;// clear the carry flag to indicate no error
 	RTS            	
 										    ;// otherwise, there was an error. Clear the error byte
@@ -105,12 +129,19 @@ WAIT_FOR_THR_EMPTY:
     BEQ WAIT_FOR_THR_EMPTY 	; loop while the THR is not empty
 	PLA                     ;	
 	STA THR 				; send the byte		
+
+;;DELAY BETWEEN CHAR SEND
     PHA
     lda     #$FF
 @txdelay:
     dec
     bne     @txdelay
     PLA
+    CMP     #$0D
+    BNE     FIM
+    LDA     #$0A
+    JMP     WRITE_BYTE
+FIM:
     RTS                     ;
 
 SAVE:

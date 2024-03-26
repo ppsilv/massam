@@ -40,7 +40,7 @@ QT_OK:
         .byte   CR,0,0,"K",CR,LF
     .else
 		;.byte   CR,LF,"OK >",CR,LF
-		.byte   CR,LF,"OK> "
+		.byte   CR,LF,"OK",CR,LF
     .endif
   .endif
 		.byte	0
