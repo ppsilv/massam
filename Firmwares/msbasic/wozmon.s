@@ -50,9 +50,9 @@ BACKSPACE:      DEY                    ; Back up text index.
 NEXTCHAR:       
 
                 JSR     READ_BYTE
-
+                BCC     NEXTCHAR        ; SE CARRY CLEAR RELE    
                 STA     IN,Y           ; Add to text buffer.
-                ;JSR     ECHO           ; Display character.
+                JSR     ECHO           ; Display character.
                 CMP     #$0D           ; CR?
                 BNE     NOTCR          ; No.
 

@@ -1,16 +1,5 @@
 .segment "CODE"
 
-.ifdef AIM65
-PRINT:
-        lda     PRIFLG
-        sta     ZBE
-        jsr     L297E
-LB8B1:
-        lda     ZBE
-        sta     PRIFLG
-        rts
-.endif
-
 PRSTRING:
         jsr     STRPRT
 L297E:
@@ -19,16 +8,10 @@ L297E:
 ; ----------------------------------------------------------------------------
 ; "PRINT" STATEMENT
 ; ----------------------------------------------------------------------------
-.ifndef AIM65
 PRINT:
-.endif
         beq     CRDO
 PRINT2:
         beq     L29DD
-.ifdef AIM65
-        jsr     LB89D
-        beq     L29DD
-.endif
         cmp     #TOKEN_TAB
         beq     L29F5
         cmp     #TOKEN_SPC
@@ -104,7 +87,7 @@ L29B9:
         sty     INPUTBUFFER,x
         ldx     #LINNUM+1
     .endif
-    .if .def(MICROTAN) || .def(SYM1)
+    .ifdef MICROTAN
         bne     CRDO2
 	.endif
   .endif
@@ -132,7 +115,7 @@ CRDO2:
         jsr     OUTDO
 
 PRINTNULLS:
-.if .def(KBD) || .def(AIM65)
+.ifdef KBD
         lda     #$00
         sta     POSX
         eor     #$FF
@@ -150,11 +133,7 @@ PRINTNULLS:
         pha
         ldx     Z15
         beq     L29D9
-      .ifdef SYM1
-        lda     #$FF
-      .else
         lda     #$00
-      .endif
 L29D3:
         jsr     OUTDO
         dex
@@ -188,7 +167,7 @@ L29EA:
 .endif
         sec
 L29EB:
-.if .def(CONFIG_CBM_ALL) || .def(AIM65)
+.ifdef CONFIG_CBM_ALL
         sbc     #$0A
 .else
   .ifdef KBD
@@ -348,10 +327,7 @@ LCA6A:
         lda     POSX
         cmp     Z17
         bne     L2A4C
-  .ifdef AIM65
-        lda #$00
-        sta POSX
-  .elseif .def(APPLE)
+  .ifdef APPLE
         nop ; PATCH!
         nop ; don't print CR
         nop

@@ -5,7 +5,7 @@
 .segment "BIOS"
 
 ;Uart registers
-;UART_PORT   = $C000            ;;Uart address
+;UART_PORT   = $7800            ;;Uart address
 RBR  = $7800    ;;receiver buffer register (read only)
 THR  = $7800    ;;transmitter holding register (write only)
 DLL  = $7800    ;;divisor latch LSB (if DLAB=1)
@@ -87,36 +87,34 @@ NO_ERR:
 	AND #DATA_READY	
 	BEQ READ_BYTE   											;// if data ready is not set, loop
 	LDA RBR 
-    PHA                     ;
-WAIT_FOR_THR:	
-    LDA ULSR                ; Get the line status register
-    AND #THR_EMPTY          ; Check for TX empty
-    BEQ WAIT_FOR_THR 	; loop while the THR is not empty
-	PLA                     ;	
-	STA THR 				; send the byte	
-
-    PHA                     ;
-    lda     #$FF
-@txdelay:
-    nop
-    dec
-    bne     @txdelay
-
-    lda     #$FF
-@txdelay1:
-    nop
-    dec
-    bne     @txdelay1
-
-
-	PLA                     ;	
-
-    ;JMP WRITE_BYTE ; ECHO
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;Echoes the caracter    
+;    PHA                     
+;WAIT_FOR_THR:	
+;    LDA ULSR                ; Get the line status register
+;    AND #THR_EMPTY          ; Check for TX empty
+;    BEQ WAIT_FOR_THR 	; loop while the THR is not empty
+;	PLA                     ;	
+;	STA THR 				; send the byte	
+;    PHA                     ;
+;    lda     #$FF
+;@txdelay:
+;    nop
+;    dec
+;    bne     @txdelay
+;
+;    lda     #$FF
+;@txdelay1:
+;    nop
+;    dec
+;    bne     @txdelay1
+;	PLA                     ;	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 	SEC		    										;// otherwise, we have data! Load it. 				    									;// clear the carry flag to indicate no error
 	RTS            	
 										    ;// otherwise, there was an error. Clear the error byte
 
-
+;*************************************************
 ; A: Data to write
 ;
 MONCOUT:

@@ -12,22 +12,15 @@
 .include "kbd_extra.s"
 .endif
 
+.ifdef OSI
+.include "osi_extra.s"
+.include "bios.s"
+.endif
+
 .ifdef APPLE
 .include "apple_extra.s"
 .endif
 
 .ifdef MICROTAN
 .include "microtan_extra.s"
-.endif
-
-.ifdef AIM65
-.include "aim65_extra.s"
-.endif
-
-.ifdef SYM1
-        .byte   0,0,0
-.endif
-
-.ifdef PDSILVA
-.include "bios.s"
 .endif

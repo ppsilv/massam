@@ -7,6 +7,9 @@ CONFIG_PRINT_CR := 1 ; print CR when line end reached
 CONFIG_SCRTCH_ORDER := 3
 CONFIG_SMALL := 1
 
+CRLF_1 := CR
+CRLF_2 := $00
+
 ; zero page
 ZP_START1 = $00
 ZP_START2 = $0D
@@ -30,8 +33,8 @@ RAMSTART2		:= $0300
 L0200           := $0200
 
 ; monitor functions
-MONRDKEY        := $FFEB
-MONCOUT         := $FFEE
-MONISCNTC       := $FFF1
-LOAD            := $FFF4
-SAVE            := $FFF7
+;MONRDKEY        := $FFEB
+;MONCOUT         := $FFEF
+;MONISCNTC       := $FFF1
+;LOAD            := $FFF4
+;SAVE            := $FFF7

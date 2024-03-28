@@ -299,7 +299,6 @@ LE68E:
         rts
 .endif
 
-.ifndef AIM65
 .if .def(CONFIG_NULL) || .def(CONFIG_PRINTNULLS)
 ; CBM1 has the keyword removed,
 ; but the code is still here
@@ -311,7 +310,6 @@ NULL:
         bcs     L2739
         dex
         stx     Z15
-L2738:
         rts
 L2739:
         jmp     IQERR
@@ -320,5 +318,4 @@ L2739:
 CLEAR:
         bne     RET1
         jmp     CLEARC
-.endif
 .endif

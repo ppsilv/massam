@@ -9,13 +9,9 @@ STR:
         pla
         pla
 LD353:
-        lda     #<(STACK2-1)
-        ldy     #>(STACK2-1)
-.if STACK2 > $0100
-        bne     STRLIT
-.else
+        lda     #$FF
+        ldy     #$00
         beq     STRLIT
-.endif
 
 ; ----------------------------------------------------------------------------
 ; GET SPACE AND MAKE DESCRIPTOR FOR STRING WHOSE
@@ -89,9 +85,6 @@ L32B6:
 .ifdef CONFIG_NO_INPUTBUFFER_ZP
         beq     LD399
         cmp     #>INPUTBUFFER
-.elseif .def(AIM65)
-        beq     LD399
-        cmp     #$01
 .endif
         bne     PUTNEW
 LD399:

@@ -30,7 +30,6 @@ OKPRT:
         rts
         nop
 .else
- .ifndef AIM65
 QT_OK:
   .ifdef CONFIG_CBM_ALL
 		.byte   CR,LF,"READY.",CR,LF
@@ -39,20 +38,19 @@ QT_OK:
 		; binary patch!
         .byte   CR,0,0,"K",CR,LF
     .else
-		;.byte   CR,LF,"OK >",CR,LF
 		.byte   CR,LF,"OK",CR,LF
     .endif
   .endif
 		.byte	0
- .endif
 .endif
+
 QT_BREAK:
 
 .ifdef KBD
 		.byte	CR,LF," Brk"
         .byte   0
         .byte   $54,$D0 ; ???
-.elseif .def(MICROTAN) || .def(AIM65)
+.elseif .def(MICROTAN)
 		.byte CR,LF," BREAK"
         .byte   0
 .else
