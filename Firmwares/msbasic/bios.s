@@ -6,18 +6,18 @@
 
 ;Uart registers
 ;UART_PORT   = $C000            ;;Uart address
-RBR  = $B000    ;;receiver buffer register (read only)
-THR  = $B000    ;;transmitter holding register (write only)
-DLL  = $B000    ;;divisor latch LSB (if DLAB=1)
-DLH  = $B001    ;;divisor latch HSB (if DLAB=1)
-IER  = $B001    ;;interrupt enable register
-IIR  = $B002    ;;interrupt identification register
-FCR  = $B002    ;;FIFO control register
-LCR  = $B003    ;;line control register
-MCR  = $B004    ;;modem control register
-ULSR = $B005    ;;line status register
-MSR  = $B006    ;;modem status register
-SCR	 = $B007	   ;;scratch register
+RBR  = $7800    ;;receiver buffer register (read only)
+THR  = $7800    ;;transmitter holding register (write only)
+DLL  = $7800    ;;divisor latch LSB (if DLAB=1)
+DLH  = $7801    ;;divisor latch HSB (if DLAB=1)
+IER  = $7801    ;;interrupt enable register
+IIR  = $7802    ;;interrupt identification register
+FCR  = $7802    ;;FIFO control register
+LCR  = $7803    ;;line control register
+MCR  = $7804    ;;modem control register
+ULSR = $7805    ;;line status register
+MSR  = $7806    ;;modem status register
+SCR	 = $7807	   ;;scratch register
 
 ; Constants
 .if .not .def(CR)
