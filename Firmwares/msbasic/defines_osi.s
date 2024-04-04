@@ -13,8 +13,8 @@ CRLF_2 := $00
 ; zero page
 ZP_START1 = $00
 ZP_START2 = $0D
-ZP_START3 = $5B
-ZP_START4 = $65
+ZP_START3 = $60
+ZP_START4 = $70
 
 ;extra ZP variables
 USR             := $000A
@@ -23,8 +23,8 @@ USR             := $000A
 STACK_TOP		:= $FC
 SPACE_FOR_GOSUB := $33
 NULL_MAX		:= $0A
-WIDTH			:= 72
-WIDTH2			:= 56
+WIDTH			:= 80
+WIDTH2			:= 80
 
 ; memory layout
 RAMSTART2		:= $0300
@@ -34,7 +34,7 @@ L0200           := $0200
 
 ; monitor functions
 ;MONRDKEY        := $FFEB
-;MONCOUT         := $FFEF
+MONCOUT         :=  WRITE_BYTE
 ;MONISCNTC       := $FFF1
 ;LOAD            := $FFF4
 ;SAVE            := $FFF7

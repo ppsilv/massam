@@ -1,4 +1,7 @@
-.setcpu "65C02"
+.setcpu "6502"
+
+.include  "bios.s"
+
 .segment "WOZMON"
 
   ;.org $8000
@@ -12,10 +15,7 @@ L     = $28                            ; Hex value parsing Low
 H     = $29                            ; Hex value parsing High
 YSAV  = $2A                            ; Used to see if hex value is given
 MODE  = $2B                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
-
-INITUART   = $DFFA
-WRITE_BYTE = $E035
-READ_BYTE  = $E01B
+COUNTER = $2C
 
 
 IN          = $0200                          ; Input buffer
@@ -194,7 +194,8 @@ ECHO:
                 JSR     WRITE_BYTE
 
                 LDA     #$FF           ; Initialize delay loop.
-TXDELAY:        DEC                    ; Decrement A.
+                STA     COUNTER
+TXDELAY:        DEC     COUNTER        ; Decrement COUNTER
                 BNE     TXDELAY        ; Until A gets to 0.
                 PLA                    ; Restore A.
                 RTS                    ; Return.

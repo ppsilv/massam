@@ -4,17 +4,18 @@
 
   ESC = $1B        ; Escape character
 
-  ;;IN    = $0200    ; Buffer used by GetLine. From $0200 through $027F (shared with Woz Mon)
+  IN    = $0200    ; Buffer used by GetLine. From $0200 through $027F (shared with Woz Mon)
 
   SaveZeroPage    = $9140      ; Routines in CFFA1 firmware
   RestoreZeroPage = $9135
 
 ; Read key from keyboard.
-;;;MONRDKEY:
-;;;        LDA     $D011           ; keyboard status
-;;;        BPL     MONRDKEY        ; branch until key pressed
-;;;        LDA     $D010           ; keyboard data
-;;;        RTS
+MONRDKEY:
+        JSR READ_BYTE
+        ;;LDA     $D011           ; keyboard status
+        ;;BPL     MONRDKEY        ; branch until key pressed
+        ;;LDA     $D010           ; keyboard data
+        RTS
 
 ; Check for presence of CFFA1 by testing for two ID bytes
 CheckForCFFA1:
@@ -34,125 +35,11 @@ NoCFFA1:
  	RTS
 
 ; Implementation of LOAD using a CFFA1 flash interface if present.
-;;;LOAD:
-;;;        JSR     CheckForCFFA1           ; returns to caller of this routine if not present
-;;;
-;;;; Prompt user for filename to load
-;;;
-;;;        LDX     #<FilenameString
-;;;        LDY     #>FilenameString
-;;;        JSR     PrintString
-;;;
-;;;; Get filename
-;;;        JSR     GetLine
-;;;
-;;;; If user hit <Esc>, cancel the load
-;;;        BCS     Return1
-;;;
-;;;; If filename was empty, call CFFA1 menu
-;;;        LDA     IN                     ; string length
-;;;        BNE     LoadFile               ; Was is zero length?
-;;;        JSR     Menu                   ; If so, call CFFA1 menu
-;;;        RTS                            ; and return
-
-; Need to save the page zero locations used by the CFFA1 because they are also used by BASIC.
-
-;;;LoadFile:
-;;;        JSR     SaveZeroPage
-;;;
-;;;; Call CFFA1 routines to load file.
-;;;
-;;;        LDA     #<IN                       ; Filename is in input buffer, length byte first.
-;;;        STA     Filename
-;;;        LDA     #>IN
-;;;        STA     Filename+1
-;;;
-;;;        LDA     #$00                       ; Destination of $0000 means use file's Auxtype value
-;;;        STA     Destination
-;;;        STA     Destination+1
-;;;
-;;;        LDX     #CFFA1_ReadFile            ; Write the file
-;;;        JSR     CFFA1_API
-;;;        BCC     Restore1                   ; Branch if succeeded
-;;;        LDX     #CFFA1_DisplayError        ; Otherwise display error message
-;;;        JSR     CFFA1_API
-;;;
-;;;; Now restore the page zero locations
-;;;Restore1:
-;;;        JSR     RestoreZeroPage
-;;;
-;;;Return1:
-;;;        RTS
-
+LOAD:
+        RTS
 ; Implementation of SAVE using a CFFA1 flash interface if present.
-;;;SAVE:
-;;;        JSR     CheckForCFFA1
-;;;
-;;;; Prompt user for filename to save
-;;;
-;;;        LDX     #<FilenameString
-;;;        LDY     #>FilenameString
-;;;        JSR     PrintString
-;;;
-;;;; Get filename
-;;;        JSR     GetLine
-;;;
-;;;; If user hit <Esc>, cancel the save
-;;;        BCS     Return2
-;;;
-;;;; If filename was empty, call CFFA1 menu
-;;;        LDA     IN                     ; string length
-;;;        BNE     SaveFile               ; Was is zero length?
-;;;        JSR     Menu                   ; If so, call CFFA1 menu
-;;;        RTS                            ; and return
-
-; Need to save the page zero locations used by the CFFA1 because they are also used by BASIC.
-;;;SaveFile:
-;;;        JSR     SaveZeroPage
-;;;
-;;;; Call CFFA1 routines to save file. Save memory from RAMSTART2 to
-;;;; MEMSIZ.
-;;;
-;;;        LDA     #<IN                       ; Filename is in input buffer, length byte first.
-;;;        STA     Filename
-;;;        LDA     #>IN
-;;;        STA     Filename+1
-;;;
-;;;        LDA     #<RAMSTART2                ; Start address
-;;;        STA     Destination
-;;;        LDA     #>RAMSTART2
-;;;        STA     Destination+1
-;;;
-;;;        SEC
-;;;        LDA     MEMSIZ                     ; Length is end address minus start address
-;;;        SBC     Destination
-;;;        STA     FileSize
-;;;
-;;;        LDA     MEMSIZ+1
-;;;        SBC     Destination+1
-;;;        STA     FileSize+1
-;;;
-;;;        LDA     #kFiletypeBinary           ; file type is binary
-;;;        STA     Filetype
-;;;
-;;;        LDA     Destination                ; Aux type is start address
-;;;        STA     Auxtype
-;;;        LDA     Destination+1
-;;;        STA     Auxtype+1
-;;;
-;;;        LDX     #CFFA1_WriteFile           ; Write the file
-;;;        JSR     CFFA1_API
-;;;        BCC     Restore2                   ; Branch if succeeded
-;;;        LDX     #CFFA1_DisplayError        ; Otherwise display error message
-;;;        JSR     CFFA1_API
-;;;
-;;;; Now restore the page zero locations
-;;;Restore2:
-;;;        JSR     RestoreZeroPage
-;;;
-;;;Return2:
-;;;        RTS
-
+SAVE:
+        RTS
 ; Print a string
 ; Pass address of string in X (low) and Y (high).
 ; String must be terminated in a null.
@@ -184,12 +71,11 @@ GetLine:
         LDX  #0                 ; Initialize index into buffer
 loop:
         JSR  MONRDKEY		; Get character from keyboard
-        AND  #$7F               ; Convert to ASCII
         CMP  #CR                ; <Enter> key pressed?
         BEQ  EnterPressed       ; If so, handle it
         CMP  #ESC               ; <Esc> key pressed?
         BEQ  EscapePressed      ; If so, handle it
-        JSR  MONCOUT            ; Echo the key pressed
+        ;JSR  MONCOUT            ; Echo the key pressed
         STA  IN+1,X             ; Store character in buffer (skip first length byte)
         INX                     ; Advance index into buffer
         CPX  #$7E               ; Buffer full?
@@ -204,7 +90,4 @@ EscapePressed:
         RTS                     ; Return
 
 NoCFFA1String:
-  .byte "?NO CFFA1 ERROR",CR,0
-
-FilenameString:
-  .byte "FILENAME? ",0
+  .byte "TEM ALGUM ERRO NESSE CARAI",CR,0

@@ -9,19 +9,19 @@
                           |                 |
                       A13 |  3           22 | ROMCE
                           |                 |
-                      A12 |  4           21 | RAMCS
+                      A12 |  4           21 | WE
                           |                 |
                       A11 |  5           20 | IORQ
                           |                 |
-                      A10 |  6           19 | RD
+                      A10 |  6           19 | RAMCS
                           |                 |
-                      A09 |  7           18 | SLOT0
+                      A09 |  7           18 | OE
                           |                 |
-                      A08 |  8           17 | SLOT1
+                      A08 |  8           17 | LIVRE
                           |                 |
-                       RW |  9           16 | SLOT2
+                       RW |  9           16 | RESET
                           |                 |
-                     PHI2 | 10           15 | SLOT3
+                     PHI2 | 10           15 | SLOT4
                           |                 |
                        NC | 11           14 | NC
                           |                 |

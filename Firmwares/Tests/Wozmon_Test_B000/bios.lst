@@ -5,7 +5,7 @@ Current file: bios.s
 000000r 1               ;***********************************************************************
 000000r 1               ; SERIAL 16c550 DRIVER
 000000r 1               ;
-000000r 1               .setcpu "65C02"
+000000r 1               .setcpu "6502"
 000000r 1               .segment "BIOS"
 000000r 1               
 000000r 1               ;Uart registers

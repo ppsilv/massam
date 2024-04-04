@@ -39,7 +39,7 @@ GAL20V8
 ;L15  =  /A15 *  A14 *  A13 *  A12 * /A11      0x7000  ram 2048
 ;IOREQ
 ;L16  =  /A15 *  A14 *  A13 *  A12 *  A11      0x7800  ram 2048
-;ROMCE
+;ROMCE 1
 ;L17  =   A15 * /A14 * /A13 * /A12 * /A11      0x8000  ram 2048
 ;L18  =   A15 * /A14 * /A13 * /A12 *  A11      0x8800  ram 2048
 ;L19  =   A15 * /A14 * /A13 *  A12 * /A11      0x9000  ram 2048
@@ -49,7 +49,7 @@ GAL20V8
 ;IOREQ
 ;L23  =   A15 * /A14 *  A13 *  A12 * /A11      0xB000  ram 2048
 ;L24  =   A15 * /A14 *  A13 *  A12 *  A11      0xB800  ram 2048
-
+;ROMCE 1
 ;L25  =   A15 *  A14 * /A13 * /A12 * /A11      0xC000  IO  2048
 ;L26  =   A15 *  A14 * /A13 * /A12 *  A11      0xC800  IO  2048
 ;L27  =   A15 *  A14 * /A13 *  A12 * /A11      0xD000  ROM 2048
@@ -63,21 +63,21 @@ GAL20V8
 ;Pinouts left side
 A15   A14   A13   A12   A11   A10   A09   A08   RW    PHI2  NC   GND
 ;Pinouts right side
-NC    NC    SLOT3 SLOT2 SLOT1 SLOT0 RD    IORQ  RAMCS ROMCE NC   VCC
+NC    NC    SLOT4 RESET LIVRE OE    RAMCS IORQ  WE    ROMCE NC   VCC
 
 
 
-
-/IORQ  = A15 * /A14 *  A13 *  A12 * /A11 + A15 * /A14 *  A13 *  A12 *  A11;
-/RD    = PHI2 * RW;
+/IORQ  = A15 * /A14 *  A13 *  A12 * /A11 +
+         A15 * /A14 *  A13 *  A12 *  A11;
+/OE    = PHI2 * RW;
+/WE    = PHI2 * /RW;
 /RAMCS = /A15;
 /ROMCE = A15 *  A14 * /A13 * /A12 * /A11  +
-A15 *  A14 * /A13 * /A12 *  A11  +
-A15 *  A14 * /A13 *  A12 * /A11  +
-A15 *  A14 * /A13 *  A12 *  A11  +
-A15 *  A14 *  A13 * /A12 * /A11  +
-A15 *  A14 *  A13 * /A12 *  A11  +
-A15 *  A14 *  A13 *  A12 * /A11  +
-A15 *  A14 *  A13 *  A12 *  A11  ;
-
+         A15 *  A14 * /A13 *  A12 * /A11  +
+         A15 *  A14 * /A13 * /A12 *  A11  +
+         A15 *  A14 * /A13 *  A12 *  A11  +
+         A15 *  A14 *  A13 * /A12 * /A11  +
+         A15 *  A14 *  A13 * /A12 *  A11  +
+         A15 *  A14 *  A13 *  A12 * /A11  +
+         A15 *  A14 *  A13 *  A12 *  A11;
 

@@ -1,7 +1,7 @@
 ;***********************************************************************
 ; SERIAL 16c550 DRIVER
 ;
-.setcpu "65C02"
+.setcpu "6502"
 .segment "BIOS"
 
 ;Uart registers

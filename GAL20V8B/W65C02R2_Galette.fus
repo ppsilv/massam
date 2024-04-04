@@ -2,16 +2,16 @@
 
 Pin 22 = ROMCE        XOR = 0   AC1 = 0
   0  x-x- -x-- -x-- -x-- ---- ---- ---- ---- ---- ----
-  1  x-x- -x-- -x-- x--- ---- ---- ---- ---- ---- ----
-  2  x-x- -x-- x--- -x-- ---- ---- ---- ---- ---- ----
+  1  x-x- -x-- x--- -x-- ---- ---- ---- ---- ---- ----
+  2  x-x- -x-- -x-- x--- ---- ---- ---- ---- ---- ----
   3  x-x- -x-- x--- x--- ---- ---- ---- ---- ---- ----
   4  x-x- x--- -x-- -x-- ---- ---- ---- ---- ---- ----
   5  x-x- x--- -x-- x--- ---- ---- ---- ---- ---- ----
   6  x-x- x--- x--- -x-- ---- ---- ---- ---- ---- ----
   7  x-x- x--- x--- x--- ---- ---- ---- ---- ---- ----
 
-Pin 21 = RAMCS        XOR = 0   AC1 = 0
-  8  ---x ---- ---- ---- ---- ---- ---- ---- ---- ----
+Pin 21 = WE           XOR = 0   AC1 = 0
+  8  ---- ---- ---- ---- ---- ---- ---- -x-- x--- ----
   9  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  10  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  11  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -30,8 +30,8 @@ Pin 20 = IORQ         XOR = 0   AC1 = 0
  22  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  23  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 19 = RD           XOR = 0   AC1 = 0
- 24  ---- ---- ---- ---- ---- ---- ---- x--- x--- ----
+Pin 19 = RAMCS        XOR = 0   AC1 = 0
+ 24  ---x ---- ---- ---- ---- ---- ---- ---- ---- ----
  25  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  26  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  27  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -40,8 +40,8 @@ Pin 19 = RD           XOR = 0   AC1 = 0
  30  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  31  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 18 = SLOT0        XOR = 0   AC1 = 0
- 32  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
+Pin 18 = OE           XOR = 0   AC1 = 0
+ 32  ---- ---- ---- ---- ---- ---- ---- x--- x--- ----
  33  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  34  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  35  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -50,7 +50,7 @@ Pin 18 = SLOT0        XOR = 0   AC1 = 0
  38  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  39  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 17 = SLOT1        XOR = 0   AC1 = 0
+Pin 17 = LIVRE        XOR = 0   AC1 = 0
  40  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  41  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  42  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -60,7 +60,7 @@ Pin 17 = SLOT1        XOR = 0   AC1 = 0
  46  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  47  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 16 = SLOT2        XOR = 0   AC1 = 0
+Pin 16 = RESET        XOR = 0   AC1 = 0
  48  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  49  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  50  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
@@ -70,7 +70,7 @@ Pin 16 = SLOT2        XOR = 0   AC1 = 0
  54  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  55  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
 
-Pin 15 = SLOT3        XOR = 0   AC1 = 0
+Pin 15 = SLOT4        XOR = 0   AC1 = 0
  56  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  57  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx
  58  xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx

@@ -16,13 +16,13 @@
   12   | GND      | GND
   13   | NC       | Input
   14   | NC       | Input
-  15   | SLOT3    | NC
-  16   | SLOT2    | NC
-  17   | SLOT1    | NC
-  18   | SLOT0    | NC
-  19   | RD       | Output
+  15   | SLOT4    | NC
+  16   | RESET    | NC
+  17   | LIVRE    | NC
+  18   | OE       | Output
+  19   | RAMCS    | Output
   20   | IORQ     | Output
-  21   | RAMCS    | Output
+  21   | WE       | Output
   22   | ROMCE    | Output
   23   | NC       | Input
   24   | VCC      | VCC

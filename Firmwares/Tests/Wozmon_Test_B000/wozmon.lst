@@ -2,8 +2,130 @@ ca65 V2.18 - Ubuntu 2.19-1
 Main file   : wozmon.s
 Current file: wozmon.s
 
-000000r 1               .setcpu "65C02"
-000000r 1               .segment "WOZMON"
+000000r 1               .setcpu "6502"
+000000r 1               
+000000r 1               .include  "bios.s"
+000000r 2               ;***********************************************************************
+000000r 2               ; SERIAL 16c550 DRIVER
+000000r 2               ;
+000000r 2               .setcpu "6502"
+000000r 2               .segment "BIOS"
+000000r 2               
+000000r 2               ;Uart registers
+000000r 2               ;UART_PORT   = $C000            ;;Uart address
+000000r 2               RBR  = $B000    ;;receiver buffer register (read only)
+000000r 2               THR  = $B000    ;;transmitter holding register (write only)
+000000r 2               DLL  = $B000    ;;divisor latch LSB (if DLAB=1)
+000000r 2               DLH  = $B001    ;;divisor latch HSB (if DLAB=1)
+000000r 2               IER  = $B001    ;;interrupt enable register
+000000r 2               IIR  = $B002    ;;interrupt identification register
+000000r 2               FCR  = $B002    ;;FIFO control register
+000000r 2               LCR  = $B003    ;;line control register
+000000r 2               MCR  = $B004    ;;modem control register
+000000r 2               ULSR = $B005    ;;line status register
+000000r 2               MSR  = $B006    ;;modem status register
+000000r 2               SCR	 = $B007	   ;;scratch register
+000000r 2               
+000000r 2               ; Constants
+000000r 2               .if .not .def(CR)
+000000r 2               	CR  = $0D ; Carriage Return
+000000r 2               .endif
+000000r 2               .if .not .def(CR)
+000000r 2               	LF  = $0A ; Line feed
+000000r 2               .endif
+000000r 2               .if .not .def(Q)
+000000r 2               	Q 		= $75
+000000r 2               .endif
+000000r 2               .if .not .def(T1)
+000000r 2               	T1		= $76
+000000r 2               .endif
+000000r 2               
+000000r 2               DIV_4800_LO   = 24
+000000r 2               DIV_4800_HI   = 0
+000000r 2               DIV_9600_LO   = 12
+000000r 2               DIV_9600_HI   = 0
+000000r 2               DIV_19200_LO  = 6
+000000r 2               DIV_19200_HI  = 0
+000000r 2               DIV_115200_LO = 1
+000000r 2               DIV_115200_HI = 0
+000000r 2               POLLED_MODE   = %00000000
+000000r 2               LCR_8N1       = %00000011
+000000r 2               DLAB          = %10000000
+000000r 2               FIFO_ENABLE   = %00000111 ;%00000111
+000000r 2               THR_EMPTY     = %01100000       ;;
+000000r 2               
+000000r 2               DATA_READY  = %00000001
+000000r 2               OVERRUN_ERR = %00000010
+000000r 2               PARITY_ERR  = %00000100
+000000r 2               FRAMING_ERR = %00001000
+000000r 2               BREAK_INT   = %00010000
+000000r 2               
+000000r 2               INITUART:
+000000r 2  48               PHA
+000001r 2  A9 80            LDA        #DLAB               ;set the divisor latch access bit (DLAB)
+000003r 2  8D 03 B0         STA        LCR
+000006r 2  A9 0C            LDA        #DIV_9600_LO        ;store divisor low byte (9600 baud @ 1,8 MHz clock)
+000008r 2  8D 00 B0         STA        DLL
+00000Br 2  A9 00            LDA        #DIV_9600_HI        ;store divisor hi byte
+00000Dr 2  8D 01 B0         STA        DLH
+000010r 2  A9 07            LDA        #FIFO_ENABLE        ;enable the UART FIFO
+000012r 2  8D 02 B0         STA        FCR
+000015r 2  A9 00            LDA        #POLLED_MODE	       ;disable all interrupts
+000017r 2  8D 01 B0         STA        IER
+00001Ar 2  A9 03        	LDA        #LCR_8N1            ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+00001Cr 2  8D 03 B0         STA        LCR
+00001Fr 2  68               PLA
+000020r 2  60               RTS
+000021r 2               
+000021r 2               ; A: Data read
+000021r 2               ; Returns:  F = C if character read
+000021r 2               ;           F = NC if no character read
+000021r 2               ;
+000021r 2               CHRIN:
+000021r 2               READ_BYTE:
+000021r 2  AD 05 B0     	LDA ULSR 												    ;// check the line status register:
+000024r 2  29 1E        	AND #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT)   ; check for errors
+000026r 2  F0 06        	BEQ NO_ERR 												    ;// if no error bits, are set, no error
+000028r 2  AD 00 B0     	LDA RBR 												    ;// otherwise, there was an error. Clear the error byte
+00002Br 2  4C rr rr     	JMP READ_BYTE
+00002Er 2               NO_ERR:
+00002Er 2  AD 05 B0     	LDA ULSR 												    ;// reload the line status register
+000031r 2  29 01        	AND #DATA_READY
+000033r 2  F0 EC        	BEQ READ_BYTE   											;// if data ready is not set, loop
+000035r 2  AD 00 B0     	LDA RBR 		    										;// otherwise, we have data! Load it. 				    									;// clear the carry flag to indicate no error
+000038r 2  60           	RTS
+000039r 2               
+000039r 2               ; A: Data to write
+000039r 2               ;
+000039r 2               WRITE_0A:
+000039r 2  A9 0A        	LDA	#$0A
+00003Br 2               CHROUT:
+00003Br 2               WRITE_BYTE:
+00003Br 2  48               PHA                     ;
+00003Cr 2               WAIT_FOR_THR_EMPTY:
+00003Cr 2  AD 05 B0         LDA ULSR                ; Get the line status register
+00003Fr 2  29 60            AND #THR_EMPTY          ; Check for TX empty
+000041r 2  F0 F9            BEQ WAIT_FOR_THR_EMPTY 	; loop while the THR is not empty
+000043r 2  68           	PLA                     ;
+000044r 2  8D 00 B0     	STA THR 				; send the byte
+000047r 2               
+000047r 2  C9 0D        	CMP	#$0D
+000049r 2  F0 EE        	BEQ	WRITE_0A
+00004Br 2               
+00004Br 2  A2 80        	LDX  #$80   ; (2 cycles)
+00004Dr 2               DELAY22:
+00004Dr 2  EA           	NOP			; (2 cycles) 1us
+00004Er 2  CA           	DEX         ; (2 cycles) 1us
+00004Fr 2  D0 FC        	BNE  DELAY22 ; (3 cycles in loop, 2 cycles at end) 1,5us in loop, 1us at end
+000051r 2  60               RTS                     ;
+000052r 2               
+000052r 2               SAVE:
+000052r 2  60           	RTS
+000053r 2               LOAD:
+000053r 2  60           	RTS
+000054r 2               
+000054r 1               
+000054r 1               .segment "WOZMON"
 000000r 1               
 000000r 1                 ;.org $8000
 000000r 1                 ;.org $FEE5
@@ -16,10 +138,7 @@ Current file: wozmon.s
 000000r 1               H     = $29                            ; Hex value parsing High
 000000r 1               YSAV  = $2A                            ; Used to see if hex value is given
 000000r 1               MODE  = $2B                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
-000000r 1               
-000000r 1               INITUART   = $DFFA
-000000r 1               WRITE_BYTE = $E035
-000000r 1               READ_BYTE  = $E01B
+000000r 1               COUNTER = $2C
 000000r 1               
 000000r 1               
 000000r 1               IN          = $0200                          ; Input buffer
@@ -30,7 +149,7 @@ Current file: wozmon.s
 000002r 1  A2 FF        	              LDX #$ff				; Set stack pointer
 000004r 1  9A           	              TXS
 000005r 1               
-000005r 1  20 FA DF                     JSR     INITUART
+000005r 1  20 rr rr                     JSR     INITUART
 000008r 1               
 000008r 1  A9 1B                        LDA     #$1B           ; Begin with escape.
 00000Ar 1               
@@ -61,7 +180,7 @@ Current file: wozmon.s
 000024r 1                               ;BEQ     NEXTCHAR       ; Loop until ready.
 000024r 1                               ;LDA     ACIA_DATA      ; Load character. B7 will be '0'.
 000024r 1               
-000024r 1  20 1B E0                     JSR     READ_BYTE
+000024r 1  20 rr rr                     JSR     READ_BYTE
 000027r 1               
 000027r 1  99 00 02                     STA     IN,Y           ; Add to text buffer.
 00002Ar 1  20 rr rr                     JSR     ECHO           ; Display character.
@@ -195,16 +314,17 @@ Current file: wozmon.s
 0000E6r 1               ECHO:
 0000E6r 1  48                           PHA                    ; Save A.
 0000E7r 1               
-0000E7r 1  20 35 E0                     JSR     WRITE_BYTE
+0000E7r 1  20 rr rr                     JSR     WRITE_BYTE
 0000EAr 1               
 0000EAr 1  A9 FF                        LDA     #$FF           ; Initialize delay loop.
-0000ECr 1  3A           TXDELAY:        DEC                    ; Decrement A.
-0000EDr 1  D0 FD                        BNE     TXDELAY        ; Until A gets to 0.
-0000EFr 1  68                           PLA                    ; Restore A.
-0000F0r 1  60                           RTS                    ; Return.
-0000F1r 1               
-0000F1r 1                 ;.org $FFFA
-0000F1r 1               .segment "RESETVEC"
+0000ECr 1  85 2C                        STA     COUNTER
+0000EEr 1  C6 2C        TXDELAY:        DEC     COUNTER        ; Decrement COUNTER
+0000F0r 1  D0 FC                        BNE     TXDELAY        ; Until A gets to 0.
+0000F2r 1  68                           PLA                    ; Restore A.
+0000F3r 1  60                           RTS                    ; Return.
+0000F4r 1               
+0000F4r 1                 ;.org $FFFA
+0000F4r 1               .segment "RESETVEC"
 000000r 1               
 000000r 1  00 0F                        .word   $0F00          ; NMI vector
 000002r 1  rr rr                        .word   RESET          ; RESET vector

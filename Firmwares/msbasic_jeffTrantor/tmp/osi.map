@@ -1,0 +1,57 @@
+Modules list:
+-------------
+osi.o:
+    CODE              Offs=000000  Size=001B68  Align=00001  Fill=0000
+    RODATA            Offs=000000  Size=000000  Align=00001  Fill=0000
+    BSS               Offs=000000  Size=000000  Align=00001  Fill=0000
+    DATA              Offs=000000  Size=000000  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=000071  Align=00001  Fill=0000
+    NULL              Offs=000000  Size=000000  Align=00001  Fill=0000
+    HEADER            Offs=000000  Size=000000  Align=00001  Fill=0000
+    VECTORS           Offs=000000  Size=000084  Align=00001  Fill=0000
+    KEYWORDS          Offs=000000  Size=0000E0  Align=00001  Fill=0000
+    DUMMY             Offs=000000  Size=000044  Align=00001  Fill=0000
+    ERROR             Offs=000000  Size=000022  Align=00001  Fill=0000
+    CHRGET            Offs=000000  Size=00001C  Align=00001  Fill=0000
+    INIT              Offs=000000  Size=0001D8  Align=00001  Fill=0000
+    EXTRA             Offs=000000  Size=0000FD  Align=00001  Fill=0000
+    BIOS              Offs=000000  Size=00043F  Align=00001  Fill=0000
+    RESETVEC          Offs=000000  Size=000006  Align=00001  Fill=0000
+
+
+Segment list:
+-------------
+Name                   Start     End    Size  Align
+----------------------------------------------------
+BSS                   000000  000000  000000  00001
+DATA                  000000  000000  000000  00001
+DUMMY                 000000  000043  000044  00001
+NULL                  000000  000000  000000  00001
+RODATA                000000  000000  000000  00001
+ZEROPAGE              000000  000070  000071  00001
+HEADER                008000  008000  000000  00001
+VECTORS               008000  008083  000084  00001
+KEYWORDS              008084  008163  0000E0  00001
+ERROR                 008164  008185  000022  00001
+CODE                  008186  009CED  001B68  00001
+CHRGET                009CEE  009D09  00001C  00001
+INIT                  009D0A  009EE1  0001D8  00001
+EXTRA                 009EE2  009FDE  0000FD  00001
+BIOS                  00FB00  00FF3E  00043F  00001
+RESETVEC              00FFFA  00FFFF  000006  00001
+
+
+Exports list by name:
+---------------------
+cpu                       001966  EA    
+
+
+Exports list by value:
+----------------------
+cpu                       001966  EA    
+
+
+Imports list:
+-------------
+cpu ([linker generated]):
+
