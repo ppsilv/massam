@@ -9,6 +9,7 @@
 ;         Included flag BASIC 
 ;         Changed separator for dump from XXXX>XXXX to XXXX.XXXX the same wozmon
 ;         Changed the return of dump to verify flag BASIC
+;         Fixed bug turn flagecho was RTS but must be jmp nextchar
 ;
 
 .setcpu "6502"
@@ -69,7 +70,7 @@ RESET:
 NEXT_CHAR:
                 LDA     #$A5
                 CMP     FLAGBASIC
-                BEQ     TEMP_Q    
+                BEQ     RETURN_BASIC    
                 LDA     #$0D
                 JSR     WRITE_BYTE
                 LDA     #'>'
@@ -77,10 +78,6 @@ NEXT_CHAR:
                 
                 JSR     READ_BYTE
                 JSR     WRITE_BYTE
-                CMP     #'E'
-                BEQ     TEMP_E
-                CMP     #'Q'            ;Show memory address data format: ADDR
-                BEQ     TEMP_Q
                 CMP     #'D'            ;Dump de memoria format: ADDR:ADDR
                 BEQ     TEMP_D
                 CMP     #'M'            ;Put byte into memory address
@@ -90,20 +87,18 @@ NEXT_CHAR:
                 CMP     #'H'            ;Show help 
                 BEQ     TEMP_H
                 JMP     NEXT_CHAR
-TEMP_E:         JMP     TURN_ECHO
-TEMP_Q:         LDA     #$0
-                CMP     FLAGBASIC
-                BEQ     NEXT_CHAR
-                RTS
 TEMP_D:         JMP     DIGITOU_D
 TEMP_M:         JMP     DIGITOU_M
 TEMP_R:         JMP     DIGITOU_R
 TEMP_H:         JMP     DIGITOU_H
 
-TURN_ECHO:      
-                LDA     FLAGECHO
-                EOR     #$FF
-                RTS                   
+                 
+RETURN_BASIC:
+                LDA     #$0
+                CMP     FLAGBASIC
+                BEQ     NEXT_CHAR
+                RTS
+
 DIGITOU_S:      
                 STA     LAST_CMD
                 LDA     #<MSG2
@@ -152,8 +147,10 @@ DIGITOU_INIT:
                 LDA     BIN,Y
                 JSR     WRITE_BYTE
                 CMP     #'Q'
-                BEQ     TEMP_Q 
-                LDY     #$00    
+                BEQ     RETURN_BASIC 
+                ;CMP     #'q'
+                ;LDY     #$00    
+                BEQ     RETURN_BASIC 
                 JSR     CONV_ADDR_TO_HEX
                 LDX     TMP1
                 LDY     TMP2
@@ -295,6 +292,11 @@ DIGITOU_R:
                 STX     ADDR1L
                 STY     ADDR1H
                 ;JSR     PRINT_ADDR_HEXA
+                ;DELISGA O ECHO
+                LDA     FLAGECHO
+                EOR     #$FF
+                STA     FLAGECHO
+
                 JMP     (ADDR1L)
                 JMP     NEXT_CHAR
 SWAP_XY:
