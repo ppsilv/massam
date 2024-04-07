@@ -8831,44 +8831,50 @@ Current file: msbasic.s
 000192r 2                 .endif
 000192r 2               QT_BASIC:
 000192r 2                 .ifdef OSI
-000192r 2  4F 53 49 20          .byte   "OSI 6502 BASIC VERSION 1.0 REV 3.2"
-000196r 2  36 35 30 32  
-00019Ar 2  20 42 41 53  
-0001B4r 2                 .endif
-0001B4r 2                 .ifdef KIM
-0001B4r 2                       .byte   "MOS TECH 6502 BASIC V1.1"
-0001B4r 2                 .endif
-0001B4r 2                 .ifdef MICROTAN
-0001B4r 2                       .byte   "MICROTAN BASIC"
-0001B4r 2                 .endif
-0001B4r 2                 .ifdef CBM1
-0001B4r 2                       .byte   $13 ; HOME
-0001B4r 2                       .byte   "*** COMMODORE BASIC ***"
-0001B4r 2                       .byte   $11,$11,$11,0 ; DOWN/DOWN/DOWN
-0001B4r 2                 .endif
-0001B4r 2                 .ifdef CBM2
-0001B4r 2                       .byte   "### COMMODORE BASIC ###"
-0001B4r 2                       .byte   CR,CR,0
-0001B4r 2                 .endif
-0001B4r 2                 .ifdef APPLE
-0001B4r 2                       .byte   LF,CR,LF
-0001B4r 2               		.byte	"APPLE BASIC V1.1"
-0001B4r 2                 .endif
-0001B4r 2                 .ifndef CONFIG_CBM_ALL
-0001B4r 2  0D 0A                .byte   CR,LF
-0001B6r 2                   .ifdef MICROTAN
-0001B6r 2                       .byte   "(C) 1980 MICROSOFT"
-0001B6r 2                   .else
-0001B6r 2  43 4F 50 59          .byte   "COPYRIGHT 1977 BY MICROSOFT CO."
-0001BAr 2  52 49 47 48  
-0001BEr 2  54 20 31 39  
-0001D5r 2                   .endif
-0001D5r 2  0D 0A 00             .byte   CR,LF,0
-0001D8r 2                 .endif
-0001D8r 2               .endif
-0001D8r 2               
-0001D8r 1               .include "extra.s"
-0001D8r 2               .segment "EXTRA"
+000192r 2  50 44 53 49          .byte   "PDSILVA 6502 BASIC VERSION 1.0 REV 3.2"
+000196r 2  4C 56 41 20  
+00019Ar 2  36 35 30 32  
+0001B8r 2                 .endif
+0001B8r 2                 .ifdef KIM
+0001B8r 2                       .byte   "MOS TECH 6502 BASIC V1.1"
+0001B8r 2                 .endif
+0001B8r 2                 .ifdef MICROTAN
+0001B8r 2                       .byte   "MICROTAN BASIC"
+0001B8r 2                 .endif
+0001B8r 2                 .ifdef CBM1
+0001B8r 2                       .byte   $13 ; HOME
+0001B8r 2                       .byte   "*** COMMODORE BASIC ***"
+0001B8r 2                       .byte   $11,$11,$11,0 ; DOWN/DOWN/DOWN
+0001B8r 2                 .endif
+0001B8r 2                 .ifdef CBM2
+0001B8r 2                       .byte   "### COMMODORE BASIC ###"
+0001B8r 2                       .byte   CR,CR,0
+0001B8r 2                 .endif
+0001B8r 2                 .ifdef APPLE
+0001B8r 2                       .byte   LF,CR,LF
+0001B8r 2               		.byte	"APPLE BASIC V1.1"
+0001B8r 2                 .endif
+0001B8r 2                 .ifndef CONFIG_CBM_ALL
+0001B8r 2  0D 0A                .byte   CR,LF
+0001BAr 2                   .ifdef MICROTAN
+0001BAr 2                       .byte   "(C) 1980 MICROSOFT"
+0001BAr 2                   .else
+0001BAr 2  43 4F 50 59          .byte   "COPYRIGHT 1977 BY MICROSOFT CO.",CR,LF
+0001BEr 2  52 49 47 48  
+0001C2r 2  54 20 31 39  
+0001DBr 2  50 44 53 49          .byte   "PDSILVA - BIOSMON 2024 - Version: "
+0001DFr 2  4C 56 41 20  
+0001E3r 2  2D 20 42 49  
+0001FDr 2  30 2E 30 2E          .byte   "0.0.5",CR,LF,0
+000201r 2  35 0D 0A 00  
+000205r 2               
+000205r 2                   .endif
+000205r 2  0D 0A 00             .byte   CR,LF,0
+000208r 2                 .endif
+000208r 2               .endif
+000208r 2               
+000208r 1               .include "extra.s"
+000208r 2               .segment "EXTRA"
 000000r 2               
 000000r 2               .ifdef KIM
 000000r 2               .include "kim_extra.s"
@@ -9274,10 +9280,10 @@ Current file: msbasic.s
 0000ED  3  xx           COUNTER: .res 1 ;= $3F
 0000EE  3  xx           FLAGBASIC: .res 1 ; Flag que indica que o biosmon foi chamado pelo basic
 0000EF  3  xx           FLAGECHO:  .res 1 ; Flag que indica se deve fazer echo ou não do caracter em Acc
-0000F0  3               BIN      = $200          ; Buffer size = 128 bytes
-0000F0  3               
 0000F0  3               
 0000F0  3               .segment "BIOS"
+000000r 3               
+000000r 3               BIN      = $200          ; Buffer size = 128 bytes
 000000r 3               
 000000r 3               ;*************************************************************
 000000r 3               ;*************************************************************
@@ -9707,11 +9713,12 @@ Current file: msbasic.s
 0002B2r 3               COMP_ADDR_FIM:
 0002B2r 3  60                       RTS
 0002B3r 3               
-0002B3r 3  30 2E 30 2E  VERSION:    .byte "0.0.5"
-0002B7r 3  35           
-0002B8r 3  0D 0A 50 44  MSG1:            .byte CR,LF,"PDSILVA - BIOSMON 2024 - Version: ",CR,0
-0002BCr 3  53 49 4C 56  
-0002C0r 3  41 20 2D 20  
+0002B3r 3               
+0002B3r 3  0D 0A 50 44  MSG1:            .byte CR,LF,"PDSILVA - BIOSMON 2024 - Version: "
+0002B7r 3  53 49 4C 56  
+0002BBr 3  41 20 2D 20  
+0002D7r 3  30 2E 30 2E                   .byte "0.0.5",CR,0
+0002DBr 3  35 0D 00     
 0002DEr 3  0D 49 6E 70  MSG2:            .byte CR,"Input Addr: ",CR,0
 0002E2r 3  75 74 20 41  
 0002E6r 3  64 64 72 3A  

@@ -35,10 +35,10 @@ ERRO:    .res 1 ;= $3E          ; CODIGO DO ERRO
 COUNTER: .res 1 ;= $3F
 FLAGBASIC: .res 1 ; Flag que indica que o biosmon foi chamado pelo basic
 FLAGECHO:  .res 1 ; Flag que indica se deve fazer echo ou não do caracter em Acc
-BIN      = $200          ; Buffer size = 128 bytes
-
 
 .segment "BIOS"
+
+BIN      = $200          ; Buffer size = 128 bytes
 
 ;*************************************************************
 ;*************************************************************
@@ -468,8 +468,9 @@ COMP_ADDR:
 COMP_ADDR_FIM:
             RTS
 
-VERSION:    .byte "0.0.5"
-MSG1:            .byte CR,LF,"PDSILVA - BIOSMON 2024 - Version: ",CR,0
+                  
+MSG1:            .byte CR,LF,"PDSILVA - BIOSMON 2024 - Version: "
+                 .byte "0.0.5",CR,0
 MSG2:            .byte CR,"Input Addr: ",CR,0
 MSG3:            .byte CR,"Dump Mem. Addr: Fmt XXXX.XXXX or XXXX:",CR,0
 MSG31:           .byte CR,"Dump Addr:XXXX.XXXX - XXXX: or Q to return to basic",CR,0

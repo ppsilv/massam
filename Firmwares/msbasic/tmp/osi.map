@@ -13,7 +13,7 @@ osi.o:
     DUMMY             Offs=000000  Size=000047  Align=00001  Fill=0000
     ERROR             Offs=000000  Size=000022  Align=00001  Fill=0000
     CHRGET            Offs=000000  Size=00001C  Align=00001  Fill=0000
-    INIT              Offs=000000  Size=0001D8  Align=00001  Fill=0000
+    INIT              Offs=000000  Size=000208  Align=00001  Fill=0000
     EXTRA             Offs=000000  Size=00006D  Align=00001  Fill=0000
     BIOS              Offs=000000  Size=00044D  Align=00001  Fill=0000
     DRV               Offs=000000  Size=0000A1  Align=00001  Fill=0000
@@ -36,8 +36,8 @@ KEYWORDS              00C08A  00C176  0000ED  00001
 ERROR                 00C177  00C198  000022  00001
 CODE                  00C199  00DD21  001B89  00001
 CHRGET                00DD22  00DD3D  00001C  00001
-INIT                  00DD3E  00DF15  0001D8  00001
-EXTRA                 00DF16  00DF82  00006D  00001
+INIT                  00DD3E  00DF45  000208  00001
+EXTRA                 00DF46  00DFB2  00006D  00001
 DRV                   00FA00  00FAA0  0000A1  00001
 BIOS                  00FB00  00FF4C  00044D  00001
 RESETVEC              00FFFA  00FFFF  000006  00001

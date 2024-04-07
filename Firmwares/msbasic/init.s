@@ -410,7 +410,7 @@ QT_BYTES_FREE:
   .endif
 QT_BASIC:
   .ifdef OSI
-        .byte   "OSI 6502 BASIC VERSION 1.0 REV 3.2"
+        .byte   "PDSILVA 6502 BASIC VERSION 1.0 REV 3.2"
   .endif
   .ifdef KIM
         .byte   "MOS TECH 6502 BASIC V1.1"
@@ -436,7 +436,10 @@ QT_BASIC:
     .ifdef MICROTAN
         .byte   "(C) 1980 MICROSOFT"
     .else
-        .byte   "COPYRIGHT 1977 BY MICROSOFT CO."
+        .byte   "COPYRIGHT 1977 BY MICROSOFT CO.",CR,LF
+        .byte   "PDSILVA - BIOSMON 2024 - Version: "
+        .byte   "0.0.5",CR,LF,0
+
     .endif
         .byte   CR,LF,0
   .endif
