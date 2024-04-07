@@ -406,7 +406,7 @@ QT_BYTES_FREE:
   .elseif .def(APPLE)
         .byte   0
   .else
-        .byte   CR,LF,CR,LF
+        .byte   CR ;,LF,CR,LF
   .endif
 QT_BASIC:
   .ifdef OSI
@@ -432,16 +432,16 @@ QT_BASIC:
 		.byte	"APPLE BASIC V1.1"
   .endif
   .ifndef CONFIG_CBM_ALL
-        .byte   CR,LF
+        .byte   CR
     .ifdef MICROTAN
         .byte   "(C) 1980 MICROSOFT"
     .else
-        .byte   "COPYRIGHT 1977 BY MICROSOFT CO.",CR,LF
+        .byte   "COPYRIGHT 1977 BY MICROSOFT CO.",CR
         .byte   "PDSILVA - BIOSMON 2024 - Version: "
-        .byte   "0.0.5",CR,LF
-        .byte   "COPYRIGHT 2024 by Open Software(pdsilva)",CR,LF,0
+        .byte   "0.0.5",CR
+        .byte   "COPYRIGHT 2024 by Open Software(pdsilva)",CR,0
 
     .endif
-        .byte   CR,LF,0
+        .byte   CR,0
   .endif
 .endif

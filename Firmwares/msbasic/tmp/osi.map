@@ -7,13 +7,13 @@ osi.o:
     DATA              Offs=000000  Size=000000  Align=00001  Fill=0000
     ZEROPAGE          Offs=000000  Size=000080  Align=00001  Fill=0000
     NULL              Offs=000000  Size=000000  Align=00001  Fill=0000
-    HEADER            Offs=000000  Size=000000  Align=00001  Fill=0000
+    HEADER            Offs=000000  Size=000003  Align=00001  Fill=0000
     VECTORS           Offs=000000  Size=00008A  Align=00001  Fill=0000
     KEYWORDS          Offs=000000  Size=0000ED  Align=00001  Fill=0000
     DUMMY             Offs=000000  Size=000047  Align=00001  Fill=0000
     ERROR             Offs=000000  Size=000022  Align=00001  Fill=0000
     CHRGET            Offs=000000  Size=00001C  Align=00001  Fill=0000
-    INIT              Offs=000000  Size=000232  Align=00001  Fill=0000
+    INIT              Offs=000000  Size=00022A  Align=00001  Fill=0000
     EXTRA             Offs=000000  Size=00006D  Align=00001  Fill=0000
     BIOS              Offs=000000  Size=000445  Align=00001  Fill=0000
     DRV               Offs=000000  Size=00009E  Align=00001  Fill=0000
@@ -30,14 +30,14 @@ DUMMY                 000000  000046  000047  00001
 NULL                  000000  000000  000000  00001
 RODATA                000000  000000  000000  00001
 ZEROPAGE              000000  00007F  000080  00001
-HEADER                00C000  00C000  000000  00001
-VECTORS               00C000  00C089  00008A  00001
-KEYWORDS              00C08A  00C176  0000ED  00001
-ERROR                 00C177  00C198  000022  00001
-CODE                  00C199  00DD14  001B7C  00001
-CHRGET                00DD15  00DD30  00001C  00001
-INIT                  00DD31  00DF62  000232  00001
-EXTRA                 00DF63  00DFCF  00006D  00001
+HEADER                00C000  00C002  000003  00001
+VECTORS               00C003  00C08C  00008A  00001
+KEYWORDS              00C08D  00C179  0000ED  00001
+ERROR                 00C17A  00C19B  000022  00001
+CODE                  00C19C  00DD17  001B7C  00001
+CHRGET                00DD18  00DD33  00001C  00001
+INIT                  00DD34  00DF5D  00022A  00001
+EXTRA                 00DF5E  00DFCA  00006D  00001
 DRV                   00FA00  00FA9D  00009E  00001
 BIOS                  00FB00  00FF44  000445  00001
 RESETVEC              00FFFA  00FFFF  000006  00001

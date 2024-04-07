@@ -570,8 +570,12 @@ Current file: msbasic.s
 000000r 2                       .byte   $00,$13,$56
 000000r 2               .endif
 000000r 2               
-000000r 1               .include "token.s"
-000000r 2               		init_token_tables
+000000r 2               .ifdef OSI
+000000r 2  4C rr rr             JMP     COLD_START
+000003r 2               .endif
+000003r 2               
+000003r 1               .include "token.s"
+000003r 2               		init_token_tables
 000000r 2               
 000000r 2  rr rr 64 75  		keyword_rts "dump", dump
 000004r 2  6D F0 xx     
@@ -8837,57 +8841,57 @@ Current file: msbasic.s
 00018Er 2                 .elseif .def(APPLE)
 00018Er 2                       .byte   0
 00018Er 2                 .else
-00018Er 2  0D 0A 0D 0A          .byte   CR,LF,CR,LF
-000192r 2                 .endif
-000192r 2               QT_BASIC:
-000192r 2                 .ifdef OSI
-000192r 2  50 44 53 49          .byte   "PDSILVA 6502 BASIC VERSION 1.0 REV 3.2"
-000196r 2  4C 56 41 20  
-00019Ar 2  36 35 30 32  
-0001B8r 2                 .endif
-0001B8r 2                 .ifdef KIM
-0001B8r 2                       .byte   "MOS TECH 6502 BASIC V1.1"
-0001B8r 2                 .endif
-0001B8r 2                 .ifdef MICROTAN
-0001B8r 2                       .byte   "MICROTAN BASIC"
-0001B8r 2                 .endif
-0001B8r 2                 .ifdef CBM1
-0001B8r 2                       .byte   $13 ; HOME
-0001B8r 2                       .byte   "*** COMMODORE BASIC ***"
-0001B8r 2                       .byte   $11,$11,$11,0 ; DOWN/DOWN/DOWN
-0001B8r 2                 .endif
-0001B8r 2                 .ifdef CBM2
-0001B8r 2                       .byte   "### COMMODORE BASIC ###"
-0001B8r 2                       .byte   CR,CR,0
-0001B8r 2                 .endif
-0001B8r 2                 .ifdef APPLE
-0001B8r 2                       .byte   LF,CR,LF
-0001B8r 2               		.byte	"APPLE BASIC V1.1"
-0001B8r 2                 .endif
-0001B8r 2                 .ifndef CONFIG_CBM_ALL
-0001B8r 2  0D 0A                .byte   CR,LF
-0001BAr 2                   .ifdef MICROTAN
-0001BAr 2                       .byte   "(C) 1980 MICROSOFT"
-0001BAr 2                   .else
-0001BAr 2  43 4F 50 59          .byte   "COPYRIGHT 1977 BY MICROSOFT CO.",CR,LF
-0001BEr 2  52 49 47 48  
-0001C2r 2  54 20 31 39  
-0001DBr 2  50 44 53 49          .byte   "PDSILVA - BIOSMON 2024 - Version: "
-0001DFr 2  4C 56 41 20  
-0001E3r 2  2D 20 42 49  
-0001FDr 2  30 2E 30 2E          .byte   "0.0.5",CR,LF
-000201r 2  35 0D 0A     
-000204r 2  43 4F 50 59          .byte   "COPYRIGHT 2024 by Open Software(pdsilva)",CR,LF,0
-000208r 2  52 49 47 48  
-00020Cr 2  54 20 32 30  
-00022Fr 2               
-00022Fr 2                   .endif
-00022Fr 2  0D 0A 00             .byte   CR,LF,0
-000232r 2                 .endif
-000232r 2               .endif
-000232r 2               
-000232r 1               .include "extra.s"
-000232r 2               .segment "EXTRA"
+00018Er 2  0D                   .byte   CR ;,LF,CR,LF
+00018Fr 2                 .endif
+00018Fr 2               QT_BASIC:
+00018Fr 2                 .ifdef OSI
+00018Fr 2  50 44 53 49          .byte   "PDSILVA 6502 BASIC VERSION 1.0 REV 3.2"
+000193r 2  4C 56 41 20  
+000197r 2  36 35 30 32  
+0001B5r 2                 .endif
+0001B5r 2                 .ifdef KIM
+0001B5r 2                       .byte   "MOS TECH 6502 BASIC V1.1"
+0001B5r 2                 .endif
+0001B5r 2                 .ifdef MICROTAN
+0001B5r 2                       .byte   "MICROTAN BASIC"
+0001B5r 2                 .endif
+0001B5r 2                 .ifdef CBM1
+0001B5r 2                       .byte   $13 ; HOME
+0001B5r 2                       .byte   "*** COMMODORE BASIC ***"
+0001B5r 2                       .byte   $11,$11,$11,0 ; DOWN/DOWN/DOWN
+0001B5r 2                 .endif
+0001B5r 2                 .ifdef CBM2
+0001B5r 2                       .byte   "### COMMODORE BASIC ###"
+0001B5r 2                       .byte   CR,CR,0
+0001B5r 2                 .endif
+0001B5r 2                 .ifdef APPLE
+0001B5r 2                       .byte   LF,CR,LF
+0001B5r 2               		.byte	"APPLE BASIC V1.1"
+0001B5r 2                 .endif
+0001B5r 2                 .ifndef CONFIG_CBM_ALL
+0001B5r 2  0D                   .byte   CR
+0001B6r 2                   .ifdef MICROTAN
+0001B6r 2                       .byte   "(C) 1980 MICROSOFT"
+0001B6r 2                   .else
+0001B6r 2  43 4F 50 59          .byte   "COPYRIGHT 1977 BY MICROSOFT CO.",CR
+0001BAr 2  52 49 47 48  
+0001BEr 2  54 20 31 39  
+0001D6r 2  50 44 53 49          .byte   "PDSILVA - BIOSMON 2024 - Version: "
+0001DAr 2  4C 56 41 20  
+0001DEr 2  2D 20 42 49  
+0001F8r 2  30 2E 30 2E          .byte   "0.0.5",CR
+0001FCr 2  35 0D        
+0001FEr 2  43 4F 50 59          .byte   "COPYRIGHT 2024 by Open Software(pdsilva)",CR,0
+000202r 2  52 49 47 48  
+000206r 2  54 20 32 30  
+000228r 2               
+000228r 2                   .endif
+000228r 2  0D 00                .byte   CR,0
+00022Ar 2                 .endif
+00022Ar 2               .endif
+00022Ar 2               
+00022Ar 1               .include "extra.s"
+00022Ar 2               .segment "EXTRA"
 000000r 2               
 000000r 2               .ifdef KIM
 000000r 2               .include "kim_extra.s"
