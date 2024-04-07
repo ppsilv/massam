@@ -34,7 +34,7 @@ BSZ:     .res 1 ;= $3D          ; string size in buffer
 ERRO:    .res 1 ;= $3E          ; CODIGO DO ERRO
 COUNTER: .res 1 ;= $3F
 FLAGBASIC: .res 1 ; Flag que indica que o biosmon foi chamado pelo basic
-FLAGECHO:  .res 1 ; Flag que indica se deve fazer echo ou não do caracter em Acc
+;FLAGECHO:  .res 1 ; Flag que indica se deve fazer echo ou não do caracter em Acc
 
 .segment "BIOS"
 
@@ -58,7 +58,7 @@ RESET:
                 STA     ADDR1H
                 STA     ADDR2L
                 STA     ADDR2H
-                STA     FLAGECHO
+                ;STA     FLAGECHO
                 STA     FLAGBASIC
 
                 JSR     INITUART
@@ -293,9 +293,9 @@ DIGITOU_R:
                 STY     ADDR1H
                 ;JSR     PRINT_ADDR_HEXA
                 ;DELISGA O ECHO
-                LDA     FLAGECHO
-                EOR     #$FF
-                STA     FLAGECHO
+                ;LDA     FLAGECHO
+                ;EOR     #$FF
+                ;STA     FLAGECHO
 
                 JMP     (ADDR1L)
                 JMP     NEXT_CHAR

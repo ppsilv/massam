@@ -438,7 +438,8 @@ QT_BASIC:
     .else
         .byte   "COPYRIGHT 1977 BY MICROSOFT CO.",CR,LF
         .byte   "PDSILVA - BIOSMON 2024 - Version: "
-        .byte   "0.0.5",CR,LF,0
+        .byte   "0.0.5",CR,LF
+        .byte   "COPYRIGHT 2024 by Open Software(pdsilva)",CR,LF,0
 
     .endif
         .byte   CR,LF,0

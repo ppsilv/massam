@@ -126,9 +126,9 @@ FIM:
 WRITE_LF:    
     CMP     #$0D
     BNE     WRITE_BYTE_WITH_ECHO_FIM
-    LDA     #$FF
-    CMP     FLAGECHO
-    BEQ     WRITE_BYTE_WITH_ECHO_FIM
+    ;;LDA     #$FF
+    ;;CMP     FLAGECHO
+    ;;BEQ     WRITE_BYTE_WITH_ECHO_FIM
 @WAIT_FOR_THR_EMPTY:
     LDA     PORT+RLSR           ; Get the Line Status Register
     AND     #THR_EMPTY          ; Check for TX empty
@@ -164,9 +164,10 @@ NO_CHAR:
 
 ACC_DELAY:   
     PHA
-    LDY     #$FF
+    LDA     #$FF
+    STA     COUNTER
 @txdelay1:
-    DEY
+    DEC     COUNTER
     BNE     @txdelay1
     PLA
     RTS    
