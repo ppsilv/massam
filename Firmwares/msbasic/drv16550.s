@@ -123,9 +123,12 @@ FIM:
     LDA     RACC                     ; Restore A Reg
     RTS
 
-WRITE_LF:
+WRITE_LF:    
     CMP     #$0D
     BNE     WRITE_BYTE_WITH_ECHO_FIM
+    LDA     #$FF
+    CMP     FLAGECHO
+    BEQ     WRITE_BYTE_WITH_ECHO_FIM
 @WAIT_FOR_THR_EMPTY:
     LDA     PORT+RLSR           ; Get the Line Status Register
     AND     #THR_EMPTY          ; Check for TX empty

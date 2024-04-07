@@ -1,11 +1,11 @@
 Modules list:
 -------------
 osi.o:
-    CODE              Offs=000000  Size=001B79  Align=00001  Fill=0000
+    CODE              Offs=000000  Size=001B7D  Align=00001  Fill=0000
     RODATA            Offs=000000  Size=000000  Align=00001  Fill=0000
     BSS               Offs=000000  Size=000000  Align=00001  Fill=0000
     DATA              Offs=000000  Size=000000  Align=00001  Fill=0000
-    ZEROPAGE          Offs=000000  Size=00007F  Align=00001  Fill=0000
+    ZEROPAGE          Offs=000000  Size=000081  Align=00001  Fill=0000
     NULL              Offs=000000  Size=000000  Align=00001  Fill=0000
     HEADER            Offs=000000  Size=000000  Align=00001  Fill=0000
     VECTORS           Offs=000000  Size=00008A  Align=00001  Fill=0000
@@ -15,8 +15,8 @@ osi.o:
     CHRGET            Offs=000000  Size=00001C  Align=00001  Fill=0000
     INIT              Offs=000000  Size=0001D8  Align=00001  Fill=0000
     EXTRA             Offs=000000  Size=00006D  Align=00001  Fill=0000
-    BIOS              Offs=000000  Size=0003D9  Align=00001  Fill=0000
-    DRV               Offs=000000  Size=00009B  Align=00001  Fill=0000
+    BIOS              Offs=000000  Size=000457  Align=00001  Fill=0000
+    DRV               Offs=000000  Size=0000A1  Align=00001  Fill=0000
     RESETVEC          Offs=000000  Size=000006  Align=00001  Fill=0000
 
 
@@ -29,17 +29,17 @@ DATA                  000000  000000  000000  00001
 DUMMY                 000000  000046  000047  00001
 NULL                  000000  000000  000000  00001
 RODATA                000000  000000  000000  00001
-ZEROPAGE              000000  00007E  00007F  00001
+ZEROPAGE              000000  000080  000081  00001
 HEADER                00C000  00C000  000000  00001
 VECTORS               00C000  00C089  00008A  00001
 KEYWORDS              00C08A  00C176  0000ED  00001
 ERROR                 00C177  00C198  000022  00001
-CODE                  00C199  00DD11  001B79  00001
-CHRGET                00DD12  00DD2D  00001C  00001
-INIT                  00DD2E  00DF05  0001D8  00001
-EXTRA                 00DF06  00DF72  00006D  00001
-DRV                   00FA00  00FA9A  00009B  00001
-BIOS                  00FB00  00FED8  0003D9  00001
+CODE                  00C199  00DD15  001B7D  00001
+CHRGET                00DD16  00DD31  00001C  00001
+INIT                  00DD32  00DF09  0001D8  00001
+EXTRA                 00DF0A  00DF76  00006D  00001
+DRV                   00FA00  00FAA0  0000A1  00001
+BIOS                  00FB00  00FF56  000457  00001
 RESETVEC              00FFFA  00FFFF  000006  00001
 
 
@@ -57,3 +57,21 @@ Imports list:
 -------------
 cpu ([linker generated]):
 
+123456789012345678901234567890123456789012345678901234567890
+100 PRINT "+---------+------------------------------------------------+"
+120 PRINT "| 2024    |     Tela de teste de programa basic            |"
+130 PRINT "+---------+------------------------------------------------+"
+140 PRINT "|  NOME                                                    |"
+145 PRINT "|      --------------------------------------              |"
+150 PRINT "|  CPF                  RG              IDADE    SEXO      |"
+155 PRINT "|      -----------------   -------------      ---    ----  |"
+160 PRINT "|                                                          |"
+170 PRINT "|  Endereco                                                |"
+180 PRINT "|           ---------------------------------------------  |"
+190 PRINT "|                                                          |"
+210 PRINT "|                                                          |"
+220 PRINT "|                                                          |"
+230 PRINT "|                                                          |"
+240 PRINT "|                                                          |"
+250 PRINT "|                                                          |"
+260 PRINT "+----------------------------------------------------------+"

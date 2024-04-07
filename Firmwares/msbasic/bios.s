@@ -1,9 +1,14 @@
 ;***********************************************************************
 ; SERIAL 16c550 DRIVER
 ;
-; Version.: 0.0.4
+; Version.: 0.0.5
 ;
 ; The verion 0.0.3 does not has the change of read and write bytes to support msbasic.
+;  0.0.5: 
+;         Changed the variables declaration to (var: .res X)
+;         Included flag BASIC 
+;         Changed separator for dump from XXXX>XXXX to XXXX.XXXX the same wozmon
+;         Changed the return of dump to verify flag BASIC
 ;
 
 .setcpu "6502"
@@ -27,7 +32,8 @@ ADDR2H:  .res 1 ;= $3C          ; Digito 1 D do hexa 0xABCD
 BSZ:     .res 1 ;= $3D          ; string size in buffer 
 ERRO:    .res 1 ;= $3E          ; CODIGO DO ERRO
 COUNTER: .res 1 ;= $3F
-;
+FLAGBASIC: .res 1 ; Flag que indica que o biosmon foi chamado pelo basic
+FLAGECHO:  .res 1 ; Flag que indica se deve fazer echo ou não do caracter em Acc
 BIN      = $200          ; Buffer size = 128 bytes
 
 
@@ -51,6 +57,8 @@ RESET:
                 STA     ADDR1H
                 STA     ADDR2L
                 STA     ADDR2H
+                STA     FLAGECHO
+                STA     FLAGBASIC
 
                 JSR     INITUART
                 LDA     #<MSG1
@@ -59,6 +67,9 @@ RESET:
                 STA     MSGH
                 JSR     SHWMSG
 NEXT_CHAR:
+                LDA     #$A5
+                CMP     FLAGBASIC
+                BEQ     TEMP_Q    
                 LDA     #$0D
                 JSR     WRITE_BYTE
                 LDA     #'>'
@@ -66,6 +77,8 @@ NEXT_CHAR:
                 
                 JSR     READ_BYTE
                 JSR     WRITE_BYTE
+                CMP     #'E'
+                BEQ     TEMP_E
                 CMP     #'Q'            ;Show memory address data format: ADDR
                 BEQ     TEMP_Q
                 CMP     #'D'            ;Dump de memoria format: ADDR:ADDR
@@ -77,12 +90,20 @@ NEXT_CHAR:
                 CMP     #'H'            ;Show help 
                 BEQ     TEMP_H
                 JMP     NEXT_CHAR
-TEMP_Q:         RTS
+TEMP_E:         JMP     TURN_ECHO
+TEMP_Q:         LDA     #$0
+                CMP     FLAGBASIC
+                BEQ     NEXT_CHAR
+                RTS
 TEMP_D:         JMP     DIGITOU_D
 TEMP_M:         JMP     DIGITOU_M
 TEMP_R:         JMP     DIGITOU_R
 TEMP_H:         JMP     DIGITOU_H
-              
+
+TURN_ECHO:      
+                LDA     FLAGECHO
+                EOR     #$FF
+                RTS                   
 DIGITOU_S:      
                 STA     LAST_CMD
                 LDA     #<MSG2
@@ -98,15 +119,40 @@ DIGITOU_S:
                 JSR     SHWMSG
                 RTS
                 JMP     NEXT_CHAR
-DIGITOU_D:
-                STA     LAST_CMD
+
+MSG_BIOSMON:                
                 LDA     #<MSG3
                 STA     MSGL
                 LDA     #>MSG3
                 STA     MSGH
                 JSR     SHWMSG
+                JMP     DIGITOU_INIT
+
+MSG_BASIC:                
+                LDA     #<MSG31
+                STA     MSGL
+                LDA     #>MSG31
+                STA     MSGH
+                JSR     SHWMSG
+                JMP     DIGITOU_INIT
+
+DIGITOU_D:
+                STA     LAST_CMD
+                LDA     FLAGBASIC
+                CMP     #$A5
+                BEQ     MSG_BASIC
+                CMP     #$00
+                BEQ     MSG_BIOSMON
+DIGITOU_INIT:                
+                LDA     #'>'
+                JSR     WRITE_BYTE
                 JSR     GETLINE
-                ;Get addr from 
+                ;Get addr from
+                LDY     #$0
+                LDA     BIN,Y
+                JSR     WRITE_BYTE
+                CMP     #'Q'
+                BEQ     TEMP_Q 
                 LDY     #$00    
                 JSR     CONV_ADDR_TO_HEX
                 LDX     TMP1
@@ -117,7 +163,7 @@ DIGITOU_D:
 
                 LDY     #$04   
                 LDA     BIN,Y
-                CMP     #$3E
+                CMP     #$2E
                 BNE     DIGITOU_D_SHOWMEM
 
                 ;Get addr to 
@@ -179,7 +225,6 @@ DIGITOU_D_SHOWMEM:
                 ;addressing mode of 6502
                 LDY     #$0
                 LDA     (ADDR1L),Y
-
                 JSR     PRBYTE    
 DIGITOU_D_SHOWMEM_FIM:
                 JMP     NEXT_CHAR
@@ -421,10 +466,11 @@ COMP_ADDR:
 COMP_ADDR_FIM:
             RTS
 
-VERSION:    .byte "0.0.4"
+VERSION:    .byte "0.0.5"
 MSG1:            .byte CR,LF,"PDSILVA - BIOSMON 2024 - Version: ",CR,0
 MSG2:            .byte CR,"Input Addr: ",CR,0
-MSG3:            .byte CR,"Dump Mem. Addr: Fmt XXXX>XXXX or XXXX:",CR,0
+MSG3:            .byte CR,"Dump Mem. Addr: Fmt XXXX.XXXX or XXXX:",CR,0
+MSG31:           .byte CR,"Dump Addr:XXXX.XXXX - XXXX: or Q to return to basic",CR,0
 MSG4:            .byte CR,"Run program in Addr: Format abcd",CR,0
 MSG5:            .byte CR,"EXECUTADO",CR,0
 MSG6:            .byte CR,"Hex conv. error",CR,0

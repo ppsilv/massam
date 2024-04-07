@@ -12,5 +12,7 @@ MYCMD:
 
 DUMP:
 dump:
+        LDA     #$A5            ;MAGIC NUMBER TO INDICATE TO BIOSMON THAT IT WAS CALLED FROM BASIC
+        STA     FLAGBASIC
         JSR     DIGITOU_D
         rts
