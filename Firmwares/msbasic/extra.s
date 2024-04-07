@@ -15,6 +15,7 @@
 .ifdef OSI
 .include "osi_extra.s"
 .include "bios.s"
+.include "mycmd.s"
 .endif
 
 .ifdef APPLE

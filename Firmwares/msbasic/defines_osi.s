@@ -15,6 +15,7 @@ ZP_START1 = $00
 ZP_START2 = $0D
 ZP_START3 = $60
 ZP_START4 = $70
+ZP_START5 = $E0 ;This is where the biosmon put its variables
 
 ;extra ZP variables
 USR             := $000A

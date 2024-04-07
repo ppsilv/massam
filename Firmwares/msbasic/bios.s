@@ -9,24 +9,25 @@
 .setcpu "6502"
 
 
-.segment "ZEROPAGE"
-RACC     = $30               ;;: .res 1
-RPHY     = $31               ;;: .res 1
-RPHX     = $32               ;;: .res 1
-MSGL     = $33
-MSGH     = $34
-TMP      = $35              ;;TEMPORARY REGISTERS
-TMP1     = $36
-TMP2     = $37
-LAST_CMD = $38  
-ADDR1L   = $39          ; Digito 4 A do hexa 0xABCD
-ADDR1H   = $3A          ; Digito 3 B do hexa 0xABCD
-ADDR2L   = $3B          ; Digito 2 C do hexa 0xABCD
-ADDR2H   = $3C          ; Digito 1 D do hexa 0xABCD
-BSZ      = $3D          ; string size in buffer 
-ERRO     = $3E          ; CODIGO DO ERRO
-COUNTER  = $3F
-
+.zeropage
+.org ZP_START5
+RACC: .res 1     ;= $30               ;;: .res 1
+;RPHY     ;= $31               ;;: .res 1
+;RPHX     ;= $32               ;;: .res 1
+MSGL: .res 1     ;= $33
+MSGH: .res 1     ;= $34
+TMP:     .res 1 ;= $35              ;;TEMPORARY REGISTERS
+TMP1:    .res 1 ;= $36
+TMP2:    .res 1 ;= $37
+LAST_CMD:.res 1 ;= $38  
+ADDR1L:  .res 1 ;= $39          ; Digito 4 A do hexa 0xABCD
+ADDR1H:  .res 1 ;= $3A          ; Digito 3 B do hexa 0xABCD
+ADDR2L:  .res 1 ;= $3B          ; Digito 2 C do hexa 0xABCD
+ADDR2H:  .res 1 ;= $3C          ; Digito 1 D do hexa 0xABCD
+BSZ:     .res 1 ;= $3D          ; string size in buffer 
+ERRO:    .res 1 ;= $3E          ; CODIGO DO ERRO
+COUNTER: .res 1 ;= $3F
+;
 BIN      = $200          ; Buffer size = 128 bytes
 
 
@@ -65,8 +66,8 @@ NEXT_CHAR:
                 
                 JSR     READ_BYTE
                 JSR     WRITE_BYTE
-                ;CMP     #'S'            ;Show memory address data format: ADDR
-                ;BEQ     TEMP_S
+                CMP     #'Q'            ;Show memory address data format: ADDR
+                BEQ     TEMP_Q
                 CMP     #'D'            ;Dump de memoria format: ADDR:ADDR
                 BEQ     TEMP_D
                 CMP     #'M'            ;Put byte into memory address
@@ -76,7 +77,7 @@ NEXT_CHAR:
                 CMP     #'H'            ;Show help 
                 BEQ     TEMP_H
                 JMP     NEXT_CHAR
-TEMP_S:         JMP     DIGITOU_S
+TEMP_Q:         RTS
 TEMP_D:         JMP     DIGITOU_D
 TEMP_M:         JMP     DIGITOU_M
 TEMP_R:         JMP     DIGITOU_R
@@ -366,7 +367,7 @@ PRINT_ADDR_HEXA_FIM:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 GETLINE:        LDY     #$00
 GETLINE1:       JSR     READ_BYTE
-                ;JSR     WRITE_BYTE
+                JSR     WRITE_BYTE
                 STA     BIN,Y
                 INY
                 CMP     #$0D

@@ -1,5 +1,8 @@
 		init_token_tables
 
+		keyword_rts "dump", dump
+		keyword_rts "DUMP", DUMP
+		keyword_rts "MYCMD", MYCMD
 		keyword_rts "END", END
 		keyword_rts "FOR", FOR
 		keyword_rts "NEXT", NEXT
