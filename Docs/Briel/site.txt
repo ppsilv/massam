@@ -1,1 +1,14 @@
+
+Explicação do replica1 que usa video atmega8 e keyboard atmega8515
+http://retro.hansotten.nl/6502-sbc/apple-1/replica-1-briel/first-replica-1/
+
 http://retro.hansotten.nl/uploads/apple1/r1sch.pdf
+
+Material do KIM Assemblador posso aproveitar
+http://retro.hansotten.nl/category/kim-1/#manuals
+
+DOS-65 para 6502
+http://retro.hansotten.nl/6502-sbc/dos-65/
+
+APPLE BOOK ONLINE Muito Interessante
+https://www.applefritter.com/replica

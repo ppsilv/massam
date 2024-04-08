@@ -1,0 +1,6 @@
+./Firmwares/msbasic/msbasic.lst
+./Firmwares/msbasic/msbasic/tmp/osi.bin
+./Firmwares/msbasic/msbasic/tmp/osi.lbl
+./Firmwares/msbasic/msbasic/tmp/osi.map
+./Firmwares/msbasic/msbasic/tmp/osi.o
+
