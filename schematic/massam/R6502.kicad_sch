@@ -7,7 +7,7 @@
   (title_block
     (title "HMC56")
     (date "24/02/2024")
-    (rev "A")
+    (rev "B")
     (company "Open Software")
     (comment 1 "Retro computer HMC56 using R6502")
     (comment 2 "Paulo da Silva (pdsilva)")
