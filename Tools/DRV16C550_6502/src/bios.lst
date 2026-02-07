@@ -1,0 +1,396 @@
+ca65 V2.18 - Ubuntu 2.19-1
+Main file   : bios.s
+Current file: bios.s
+
+000000r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000r 1               ; BIOS
+000000r 1               ; AUTHOR: Paulo da Silva (pgordao) copyright (C) 2024
+000000r 1               ;
+000000r 1               ;
+000000r 1               ;; VERSION 0.0.2
+000000r 1               
+000000r 1               .setcpu "6502"
+000000r 1               .debuginfo
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1               
+000000r 1               ACC = $32
+000000r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000r 1               ; These variable is just for test of UART.
+000000r 1               MSGL     = $33
+000000r 1               MSGH     = $34
+000000r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000r 1               ; These variables is to save registers X and Y in cpu 6502 although it does
+000000r 1               ; not have PHX and PHY.
+000000r 1               MPHX     = $35
+000000r 1               MPHY     = $36
+000000r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000r 1               ; Counter is to be used com DEC in 6502 that does not has a dec for Acc
+000000r 1               COUNTER  = $37
+000000r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000r 1               ;Flag to sign the use of WRITE_BYTE or WRITE_BYTE_LF
+000000r 1               MEOR     = $38
+000000r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000000r 1               COUNTER1 = $39
+000000r 1               
+000000r 1               .segment "BIOS"
+000000r 1  30 2E 30 2E  VERSION:    .byte "0.0.2"
+000004r 1  32           
+000005r 1               
+000005r 1               ;Uart registers
+000005r 1               PORT = $7800  ;;Uart address
+000005r 1               R_RX = $00    ;;receiver buffer register (read only)
+000005r 1               R_TX = $00    ;;transmitter holding register (write only)
+000005r 1               RDLL = $00    ;;divisor latch LSB (if DLAB=1)
+000005r 1               RDLH = $01    ;;divisor latch HSB (if DLAB=1)
+000005r 1               RIER = $01    ;;interrupt enable register
+000005r 1               RIIR = $02    ;;interrupt identification register
+000005r 1               RFCR = $02    ;;FIFO control register
+000005r 1               RLCR = $03    ;;line control register
+000005r 1               RMCR = $04    ;;modem control register
+000005r 1               RLSR = $05    ;;line status register
+000005r 1               RMSR = $06    ;;modem status register
+000005r 1               RSCR = $07	;;scratch register
+000005r 1               
+000005r 1               ; Constants
+000005r 1               .if .not .def(CR)
+000005r 1               	CR  = $0D ; Carriage Return
+000005r 1               .endif
+000005r 1               .if .not .def(LF)
+000005r 1               	LF  = $0A ; Line feed
+000005r 1               .endif
+000005r 1               
+000005r 1               DIV_4800_LO   = 24
+000005r 1               DIV_4800_HI   = 0
+000005r 1               DIV_9600_LO   = 12
+000005r 1               DIV_9600_HI   = 0
+000005r 1               DIV_19200_LO  = 6
+000005r 1               DIV_19200_HI  = 0
+000005r 1               DIV_115200_LO = 1
+000005r 1               DIV_115200_HI = 0
+000005r 1               POLLED_MODE   = %00000000
+000005r 1               LCR_8N1       = %00000011
+000005r 1               DLAB          = %10000000
+000005r 1               FIFO_ENABLE   = %00000111 ;%00000111
+000005r 1               THR_EMPTY     = %01100000       ;;
+000005r 1               
+000005r 1               DATA_READY    = %00000001
+000005r 1               OVERRUN_ERR   = %00000010
+000005r 1               PARITY_ERR    = %00000100
+000005r 1               FRAMING_ERR   = %00001000
+000005r 1               BREAK_INT     = %00010000
+000005r 1               MCR_DTR  = $01  ;dtr output
+000005r 1               MCR_RTS  = $02  ;rts output
+000005r 1               MCR_OUT1 = $04  ;output #1
+000005r 1               MCR_OUT2 = $08  ;output #2
+000005r 1               MCR_LOOP = $10  ;loop back
+000005r 1               MCR_AFCE = $20  ;auto flow control enable
+000005r 1               
+000005r 1               
+000005r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000005r 1               ; INITUART: Initialize uart 16C550
+000005r 1               ; Registers changed: NONE
+000005r 1               ;
+000005r 1               INITUART:
+000005r 1  A9 80            LDA        #DLAB               ;set the divisor latch access bit (DLAB)
+000007r 1  8D 03 78         STA        PORT+RLCR
+00000Ar 1  A9 0C            LDA        #DIV_9600_LO        ;store divisor low byte (9600 baud @ 1,8 MHz clock)
+00000Cr 1  8D 00 78         STA        PORT+RDLL
+00000Fr 1  A9 00            LDA        #DIV_9600_HI        ;store divisor hi byte
+000011r 1  8D 01 78         STA        PORT+RDLH
+000014r 1  A9 07            LDA        #FIFO_ENABLE        ;enable the UART FIFO
+000016r 1  8D 02 78         STA        PORT+RFCR
+000019r 1  A9 00            LDA        #POLLED_MODE	       ;disable all interrupts
+00001Br 1  8D 01 78         STA        PORT+RIER
+00001Er 1  A9 03        	LDA        #LCR_8N1            ;set 8 data bits, 1 stop bit, no parity, disable DLAB
+000020r 1  8D 03 78         STA        PORT+RLCR
+000023r 1  A9 2B            LDA        #MCR_OUT2 + MCR_RTS + MCR_DTR + MCR_AFCE
+000025r 1  8D 04 78         STA        PORT+RMCR
+000028r 1  AD 00 78         LDA        PORT+R_RX           ;Clear RX buffer
+00002Br 1  60               RTS
+00002Cr 1               
+00002Cr 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00002Cr 1               ; READ_BYTE: Read byte from UART waiting for it (NO BLOCANT) No echo
+00002Cr 1               ; Registers changed: A, Y
+00002Cr 1               ; Flag CARRY: Set when character ready
+00002Cr 1               ;             Clear when no character ready
+00002Cr 1               READ_BYTE:
+00002Cr 1  AD 05 78     	LDA PORT+RLSR 												;// check the line status register:
+00002Fr 1  29 1E        	AND #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT)   ; check for errors
+000031r 1  F0 06        	BEQ @NO_ERR 												    ;// if no error bits, are set, no error
+000033r 1  AD 00 78     	LDA PORT+R_RX
+000036r 1  4C rr rr     	JMP NO_CHAR
+000039r 1               @NO_ERR:
+000039r 1  AD 05 78     	LDA PORT+RLSR 												    ;// reload the line status register
+00003Cr 1  29 01        	AND #DATA_READY
+00003Er 1  F0 08        	BEQ NO_CHAR   											;// if data ready is not set, loop
+000040r 1  AD 00 78     	LDA PORT+R_RX
+000043r 1  20 rr rr         JSR     ACC_DELAY
+000046r 1  38           	SEC		    										;// otherwise, we have data! Load it. 				    									;// clear the carry flag to indicate no error
+000047r 1  60           	RTS
+000048r 1               NO_CHAR:
+000048r 1  20 rr rr         JSR     ACC_DELAY
+00004Br 1  18               CLC
+00004Cr 1  60               RTS
+00004Dr 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00004Dr 1               ;
+00004Dr 1               ACC_DELAY:
+00004Dr 1  48               PHA
+00004Er 1  A0 FF            LDY     #$FF
+000050r 1               @txdelay1:
+000050r 1  88               DEY
+000051r 1  D0 FD            BNE     @txdelay1
+000053r 1  68               PLA
+000054r 1  60               RTS
+000055r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000055r 1               ; READ_BYTE: Read byte from UART waiting for it (NO BLOCANT)
+000055r 1               ; Registers changed: A, Y
+000055r 1               ; Flag CARRY: Set when character ready
+000055r 1               ;             Clear when no character ready
+000055r 1               READ_BYTE_ECHO:
+000055r 1  20 rr rr         JSR     READ_BYTE
+000058r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000058r 1               ;ECHO CHAR
+000058r 1  20 rr rr         JSR     WRITE_BYTE_WITH_LF
+00005Br 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00005Br 1  60               RTS
+00005Cr 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00005Cr 1               ; B_READ_BYTE: Read byte from UART waiting for it (BLOCANT)
+00005Cr 1               ; Registers changed: A
+00005Cr 1               ; Flag CARRY not changed.
+00005Cr 1               ;
+00005Cr 1               B_READ_BYTE:
+00005Cr 1  AD 05 78     	LDA PORT+RLSR 												;// check the line status register:
+00005Fr 1  29 1E        	AND #(OVERRUN_ERR | PARITY_ERR | FRAMING_ERR | BREAK_INT)   ; check for errors
+000061r 1  F0 06        	BEQ @NO_ERR 												    ;// if no error bits, are set, no error
+000063r 1  AD 00 78     	LDA PORT+R_RX
+000066r 1  4C rr rr     	JMP B_READ_BYTE
+000069r 1               @NO_ERR:
+000069r 1  AD 05 78     	LDA PORT+RLSR 												    ;// reload the line status register
+00006Cr 1  29 01        	AND #DATA_READY
+00006Er 1  F0 EC        	BEQ B_READ_BYTE   											;// if data ready is not set, loop
+000070r 1  AD 00 78     	LDA PORT+R_RX
+000073r 1  60           	RTS
+000074r 1               
+000074r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000074r 1               ; B_READ_BYTE_ECHO: Read byte from UART waiting for it (BLOCANT) with echo
+000074r 1               ; Registers changed: A
+000074r 1               ; Flag CARRY not changed.
+000074r 1               ;
+000074r 1               B_READ_BYTE_ECHO:
+000074r 1  20 rr rr         JSR     B_READ_BYTE
+000077r 1               ;ECHO CHAR
+000077r 1  20 rr rr         JSR     WRITE_BYTE_WITH_LF
+00007Ar 1               ;*********
+00007Ar 1  60           	RTS
+00007Br 1               
+00007Br 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00007Br 1               ; WRITE_BYTE: Write byte to UART
+00007Br 1               ; Registers changed: NONE
+00007Br 1               ; Flag CARRY not changed.
+00007Br 1               ;
+00007Br 1               WRITE_BYTE:
+00007Br 1  48               PHA
+00007Cr 1               WAIT_FOR_THR_EMPTY:
+00007Cr 1  AD 05 78         LDA     PORT+RLSR           ; Get the Line Status Register
+00007Fr 1  29 60            AND     #THR_EMPTY          ; Check for TX empty
+000081r 1  F0 F9            BEQ     WAIT_FOR_THR_EMPTY 	; loop while the THR is not empty
+000083r 1  68           	PLA
+000084r 1  8D 00 78     	STA     PORT+R_TX 			; send the byte
+000087r 1  48               PHA
+000088r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000088r 1               ;DELAY BETWEEN CHAR SENT
+000088r 1  A9 40            LDA     #$40
+00008Ar 1  85 39            STA     COUNTER1
+00008Cr 1               @YDELAY:
+00008Cr 1  A9 FF            LDA     #$FF
+00008Er 1  85 37            STA     COUNTER
+000090r 1               @txdelay:
+000090r 1  C6 37            DEC     COUNTER
+000092r 1  D0 FC            BNE     @txdelay
+000094r 1  C6 39            DEC     COUNTER1
+000096r 1  D0 F4            BNE     @YDELAY
+000098r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+000098r 1  68               PLA
+000099r 1  60               RTS
+00009Ar 1               
+00009Ar 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+00009Ar 1               ; WRITE_BYTE_WITH_LF: Write byte to UART, IF BYTE IS 0D WRITE 0A(LF) TOO
+00009Ar 1               ; Registers changed: NONE
+00009Ar 1               ; Flag CARRY not changed.
+00009Ar 1               ;
+00009Ar 1               WRITE_BYTE_WITH_LF:
+00009Ar 1  48               PHA                         ; Save A Reg
+00009Br 1               @WAIT_FOR_THR_EMPTY:
+00009Br 1  AD 05 78         LDA     PORT+RLSR           ; Get the Line Status Register
+00009Er 1  29 60            AND     #THR_EMPTY          ; Check for TX empty
+0000A0r 1  F0 F9            BEQ     @WAIT_FOR_THR_EMPTY 	; loop while the THR is not empty
+0000A2r 1  68           	PLA
+0000A3r 1  8D 00 78     	STA     PORT+R_TX 			; send the byte
+0000A6r 1  48               PHA
+0000A7r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000A7r 1               ;DELAY BETWEEN CHAR SENT
+0000A7r 1  A9 40            LDA     #$40
+0000A9r 1  85 39            STA     COUNTER1
+0000ABr 1               @YDELAY:
+0000ABr 1  A9 FF            LDA     #$FF
+0000ADr 1  85 37            STA     COUNTER
+0000AFr 1               @txdelay:
+0000AFr 1  C6 37            DEC     COUNTER
+0000B1r 1  D0 FC            BNE     @txdelay
+0000B3r 1  C6 39            DEC     COUNTER1
+0000B5r 1  D0 F4            BNE     @YDELAY
+0000B7r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000B7r 1               ;WRITE A LF IF ACC HAS A $0D IN IT
+0000B7r 1  68               PLA
+0000B8r 1  C9 0D            CMP     #$0D
+0000BAr 1  D0 05            BNE     WRITE_BYTE_WITH_ECHO_FIM
+0000BCr 1  A9 0A            LDA     #$0A
+0000BEr 1  20 rr rr         JSR     WRITE_BYTE
+0000C1r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000C1r 1               WRITE_BYTE_WITH_ECHO_FIM:
+0000C1r 1  60               RTS
+0000C2r 1               
+0000C2r 1               
+0000C2r 1               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+0000C2r 1               ; The code from here is just for test of UART.
+0000C2r 1               RESET:
+0000C2r 1               
+0000C2r 1  78           	    SEI						; No interrupt
+0000C3r 1  D8           	    CLD						; Set decimal
+0000C4r 1  A2 FF        	    LDX #$ff				; Set stack pointer
+0000C6r 1  9A           	    TXS
+0000C7r 1               
+0000C7r 1  20 rr rr             JSR     INITUART
+0000CAr 1  A9 00                LDA     #$00
+0000CCr 1  85 38                STA     MEOR
+0000CEr 1  A9 rr                LDA     #<MSG0
+0000D0r 1  85 33                STA     MSGL
+0000D2r 1  A9 rr                LDA     #>MSG0
+0000D4r 1  85 34                STA     MSGH
+0000D6r 1  20 rr rr             JSR     SHWMSG
+0000D9r 1                       ;READ_BYTE no blocant sem echo
+0000D9r 1               WORK:
+0000D9r 1  20 rr rr             JSR     READ_BYTE
+0000DCr 1  90 FB                BCC     WORK
+0000DEr 1  C9 30                CMP     #'0'
+0000E0r 1  F0 12                BEQ     RD_NO_BL_NO_LF
+0000E2r 1  C9 31                CMP     #'1'
+0000E4r 1  F0 20                BEQ     RD_BL_NO_ECHO_NO_LF
+0000E6r 1  C9 32                CMP     #'2'
+0000E8r 1  F0 2C                BEQ     RD_NO_BL_COM_ECHO_COM_LF
+0000EAr 1  C9 33                CMP     #'3'
+0000ECr 1  F0 37                BEQ     RD_BL_COM_ECHO_COM_LF
+0000EEr 1  20 rr rr             JSR     WRITE_BYTE
+0000F1r 1  4C rr rr             JMP     WORK
+0000F4r 1               
+0000F4r 1                       ;READ_BYTE no blocant sem echo write sem LF
+0000F4r 1               RD_NO_BL_NO_LF:
+0000F4r 1  20 rr rr             JSR     pmsg1
+0000F7r 1               RD_NO_BL_1:
+0000F7r 1  20 rr rr             JSR     READ_BYTE           ;NAO BLOCANTE
+0000FAr 1  90 FB                BCC     RD_NO_BL_1
+0000FCr 1  20 rr rr             JSR     WRITE_BYTE          ;SEM LF
+0000FFr 1  C9 52                CMP     #'R'
+000101r 1  D0 F4                BNE     RD_NO_BL_1
+000103r 1  4C rr rr             JMP     WORK
+000106r 1               
+000106r 1               
+000106r 1                       ;READ_BYTE blocant sem echo write sem LF
+000106r 1               RD_BL_NO_ECHO_NO_LF:
+000106r 1  20 rr rr             JSR     pmsg2
+000109r 1               RD_NO_BL_ECHO_1:
+000109r 1  20 rr rr             JSR     B_READ_BYTE         ;BLOCANTE
+00010Cr 1  20 rr rr             JSR     WRITE_BYTE          ;SEM LF
+00010Fr 1  C9 52                CMP     #'R'
+000111r 1  D0 F6                BNE     RD_NO_BL_ECHO_1
+000113r 1  4C rr rr             JMP     WORK
+000116r 1               
+000116r 1                       ;B_READ_BYTE read nao blocante com echo e write com LF
+000116r 1               RD_NO_BL_COM_ECHO_COM_LF:
+000116r 1  20 rr rr             JSR     pmsg3
+000119r 1               RD_NO_BL_COM_ECHO_COM_LF1:
+000119r 1  20 rr rr             JSR     READ_BYTE_ECHO
+00011Cr 1  90 FB                BCC     RD_NO_BL_COM_ECHO_COM_LF1
+00011Er 1  C9 52                CMP     #'R'
+000120r 1  D0 F7                BNE     RD_NO_BL_COM_ECHO_COM_LF1
+000122r 1  4C rr rr             JMP     WORK
+000125r 1                       ;B_READ_BYTE read blocant with echo
+000125r 1               RD_BL_COM_ECHO_COM_LF:
+000125r 1  20 rr rr             JSR     pmsg4
+000128r 1               RD_BL_COM_ECHO_COM_LF1:
+000128r 1  20 rr rr             JSR     B_READ_BYTE_ECHO
+00012Br 1  C9 52                CMP     #'R'
+00012Dr 1  D0 F9                BNE     RD_BL_COM_ECHO_COM_LF1
+00012Fr 1  4C rr rr             JMP     WORK
+000132r 1               
+000132r 1  0D 0A 50 52  MSG0:       .byte $0D,$0A,"PROGRAM INIT 2024 - Version: DIGITE ALGUM COMANDO:",$0D,$0A,0
+000136r 1  4F 47 52 41  
+00013Ar 1  4D 20 49 4E  
+000169r 1  0D 0A 30 2D  MSG1:       .byte $0D,$0A,"0-READ_BYTE nao blocante sem echo e write sem LF",$0D,$0A,0
+00016Dr 1  52 45 41 44  
+000171r 1  5F 42 59 54  
+00019Er 1  0D 0A 31 2D  MSG2:       .byte $0D,$0A,"1-READ_BYTE blocante sem echo e write sem lf",$0D,$0A,0
+0001A2r 1  52 45 41 44  
+0001A6r 1  5F 42 59 54  
+0001CFr 1  0D 0A 32 2D  MSG3:       .byte $0D,$0A,"2-READ_BYTE nao blocante com echo e write com LF",$0D,$0A,0
+0001D3r 1  52 45 41 44  
+0001D7r 1  5F 42 59 54  
+000204r 1  0D 0A 33 2D  MSG4:       .byte $0D,$0A,"3-READ_BYTE blocante com echo e write com LF",$0D,$0A,0
+000208r 1  52 45 41 44  
+00020Cr 1  5F 42 59 54  
+000235r 1               
+000235r 1               
+000235r 1               ;*************************************************
+000235r 1  A0 00        SHWMSG:         LDY #$0
+000237r 1               SMSG:
+000237r 1  B1 33                        LDA (MSGL),Y
+000239r 1  F0 07                        BEQ SMDONE
+00023Br 1  20 rr rr                     JSR WRITE_BYTE
+00023Er 1               ;;;;;;                LDA #$FF
+00023Er 1               ;;;;;;                STA COUNTER
+00023Er 1               ;;;;;;@txdelay:
+00023Er 1               ;;;;;;                DEC COUNTER
+00023Er 1               ;;;;;;                BNE @txdelay
+00023Er 1  C8                           INY
+00023Fr 1  4C rr rr                     JMP SMSG  ;SEMPRE VAI PULAR PARA SMSG E DEVE FAZER ISSO
+000242r 1  60           SMDONE:         RTS
+000243r 1               
+000243r 1               
+000243r 1               pmsg1:
+000243r 1  A9 rr                LDA     #<MSG1
+000245r 1  85 33                STA     MSGL
+000247r 1  A9 rr                LDA     #>MSG1
+000249r 1  85 34                STA     MSGH
+00024Br 1  20 rr rr             JSR     SHWMSG
+00024Er 1  60                   RTS
+00024Fr 1               pmsg2:
+00024Fr 1  A9 rr                LDA     #<MSG2
+000251r 1  85 33                STA     MSGL
+000253r 1  A9 rr                LDA     #>MSG2
+000255r 1  85 34                STA     MSGH
+000257r 1  20 rr rr             JSR     SHWMSG
+00025Ar 1  60                   RTS
+00025Br 1               pmsg3:
+00025Br 1  A9 rr                LDA     #<MSG3
+00025Dr 1  85 33                STA     MSGL
+00025Fr 1  A9 rr                LDA     #>MSG3
+000261r 1  85 34                STA     MSGH
+000263r 1  20 rr rr             JSR     SHWMSG
+000266r 1  60                   RTS
+000267r 1               pmsg4:
+000267r 1  A9 rr                LDA     #<MSG4
+000269r 1  85 33                STA     MSGL
+00026Br 1  A9 rr                LDA     #>MSG4
+00026Dr 1  85 34                STA     MSGH
+00026Fr 1  20 rr rr             JSR     SHWMSG
+000272r 1  60                   RTS
+000273r 1               
+000273r 1               
+000273r 1               .segment "RESETVEC"
+000000r 1  00 0F                        .word   $0F00          ; NMI vector
+000002r 1  rr rr                        .word   RESET          ; RESET vector
+000004r 1  00 00                        .word   $0000          ; IRQ vector
+000004r 1               
